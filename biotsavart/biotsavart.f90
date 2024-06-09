@@ -21,6 +21,7 @@ module biotsavart
     end subroutine calc_vector_potential
 
     pure subroutine calc_vector_potential_single(x_wire, x_eval, A)
+        ! https://doi.org/10.1016/j.cpc.2023.108692
         real(dp), intent(in) :: x_wire(:, :), x_eval(:)
         real(dp), intent(out) :: A(:)
 
