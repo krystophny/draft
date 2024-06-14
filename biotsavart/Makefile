@@ -6,7 +6,7 @@ SOURCES = biotsavart.f90
 
 all: test_biotsavart.x
 
-test_biotsavart.x: unittest.f90 test_biotsavart.f90 biotsavart.so
+test_biotsavart.x: $(CODE)/draft/unittest/unittest.f90 test_biotsavart.f90 biotsavart.so
 	$(FC) -o $@ $^ $(FFLAGS)
 
 biotsavart.so: $(SOURCES)
