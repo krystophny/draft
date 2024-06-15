@@ -1,5 +1,5 @@
 FC = gfortran
-FFLAGS = -fPIC -Wall -Wno-unused-dummy-argument -g -O2
+FFLAGS = -fPIC -Wall -Wno-unused-dummy-argument -g -Og
 FFLAGS += -I$(CODE)/libneo/build -L$(CODE)/libneo/build -lneo
 
 SOURCES = magfie3d_abstract.f90 magfie3d_analytical.f90 magfie3d.f90
