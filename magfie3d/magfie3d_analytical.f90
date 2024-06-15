@@ -1,6 +1,6 @@
-module field3d_analytical
+module magfie3d_analytical
     use, intrinsic :: iso_fortran_env, only: dp => real64
-    use field3d_abstract
+    use magfie3d_abstract
 
     implicit none
 
@@ -8,29 +8,29 @@ module field3d_analytical
     real(dp), parameter :: MU0_OVER_TWOPI = 2.0d-7
 
 
-    type, extends(field3d_t) :: field3d_wires_t
+    type, extends(magfie3d_t) :: magfie3d_wires_t
         real(dp), allocatable :: x_wires(:, :)
         contains
-        procedure :: init => field3d_wires_init
-        procedure :: afield => field3d_wires_afield
-    end type field3d_wires_t
+        procedure :: init => magfie3d_wires_init
+        procedure :: afield => magfie3d_wires_afield
+    end type magfie3d_wires_t
 
     contains
 
-    subroutine field3d_wires_init(self, x_wires)
-        class(field3d_wires_t), intent(inout) :: self
+    subroutine magfie3d_wires_init(self, x_wires)
+        class(magfie3d_wires_t), intent(inout) :: self
         real(dp), intent(in) :: x_wires(:, :)
 
         self%x_wires = x_wires
-    end subroutine field3d_wires_init
+    end subroutine magfie3d_wires_init
 
-    subroutine field3d_wires_afield(self, x, A)
-        class(field3d_wires_t), intent(inout) :: self
+    subroutine magfie3d_wires_afield(self, x, A)
+        class(magfie3d_wires_t), intent(inout) :: self
         real(dp), intent(in) :: x(:, :)
         real(dp), intent(inout) :: A(:, :)
 
         call afield_wires(self%x_wires, x, A)
-    end subroutine field3d_wires_afield
+    end subroutine magfie3d_wires_afield
 
 
     pure subroutine afield_wires(x_wires, x_eval, A)
@@ -83,4 +83,4 @@ module field3d_analytical
                   asinh((z2 - x(3, i))/rho) - asinh((z1 - x(3, i))/rho))
         end do
     end subroutine afield_wire_zaxis
-end module field3d_analytical
+end module magfie3d_analytical

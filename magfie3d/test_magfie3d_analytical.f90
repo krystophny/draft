@@ -1,6 +1,6 @@
 program test_biotsavart
     use unittest
-    use field3d_analytical
+    use magfie3d_analytical
     implicit none
 
     real(dp), parameter :: TOL = 1.0d-10
@@ -20,7 +20,7 @@ program test_biotsavart
         real(dp), dimension(3, NPOINTS_EVAL) :: x_eval, A_ref, A
         real(dp), dimension(3, NPOINTS_WIRE) :: x_wires
 
-        type(field3d_wires_t) :: field
+        type(magfie3d_wires_t) :: field
 
         call get_points_on_line(1.0d0, 0.0d0, WIRE_LENGTH, x_eval)
         call get_points_on_line(0.0d0, 0.0d0, WIRE_LENGTH, x_wires)
