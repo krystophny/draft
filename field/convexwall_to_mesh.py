@@ -23,8 +23,6 @@ def main():
         for i in range(len(wall_data) - 1)
     ]
 
-    print(wall_points)
-
     wall_lines = [
         model.add_line(wall_points[i], wall_points[i + 1])
         for i in range(-1, len(wall_points) - 1)
