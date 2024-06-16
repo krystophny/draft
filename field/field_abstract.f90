@@ -9,11 +9,11 @@ module field_abstract
     end type scalar_field_t
 
     interface
-        subroutine scalar_field_evaluate(self, x, Phi)
+        subroutine scalar_field_evaluate(self, x, u)
             import :: scalar_field_t, dp
             class (scalar_field_t), intent(inout) :: self
             real(dp), intent(in) :: x(:, :)
-            real(dp), intent(inout) :: Phi(:, :)
+            real(dp), intent(inout) :: u(:)
         end subroutine scalar_field_evaluate
     end interface
 end module field_abstract
