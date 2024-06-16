@@ -8,7 +8,7 @@ CXXFLAGS = -fPIC -Wall -g -Og \
 
 SOURCES = field_abstract.f90 field_mfem.f90 field.f90
 
-all: libfield.so test_mfem.x
+all: libfield.so test_mfem.x aug.msh
 
 libfield.so: $(SOURCES)
 	$(FC) -shared -o $@ $^ $(FFLAGS)
@@ -16,5 +16,8 @@ libfield.so: $(SOURCES)
 test_mfem.x: field_mfem_interface.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
+aug.msh: convexwall_to_mesh.py convexwall_aug_inside_bcoils.dat
+	python $^ $@
+
 clean:
-	rm -f *.o *.so *.x *.mod
+	rm -f *.o *.so *.x *.mod *.msh

@@ -2,6 +2,7 @@
 import os
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 import gmsh
 import pygmsh
 
@@ -36,15 +37,13 @@ def main():
     # Call gmsh kernel before add physical entities
     model.synchronize()
 
-    volume_marker = 6
-    model.add_physical([plane_surface], "Volume")
+    # volume_marker = 6
+    # model.add_physical([plane_surface], "Volume")
 
     geometry.generate_mesh(dim=2)
     gmsh.write(mesh_file)
     gmsh.clear()
     geometry.__exit__()
-
-
 
 if __name__ == '__main__':
     main()
