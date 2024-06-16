@@ -14,13 +14,24 @@ int main(int argc, char *argv[])
     int num_points = points.size();
     int dim = points[0].Size();
 
-    // 2. Create a mesh from the points.
-    Mesh mesh(dim, num_points, 0, 0);
+    // 2. Create a mesh from the points and add elements.
+    Mesh mesh(dim, num_points, 1, 0); // Correctly allocate for 1 element
 
     for (const auto &point : points)
     {
         mesh.AddVertex(point.GetData());
     }
+
+    // Add elements to the mesh
+    Array<int> vertices(4);
+    vertices[0] = 0;
+    vertices[1] = 1;
+    vertices[2] = 3;
+    vertices[3] = 2;
+    mesh.AddQuad(vertices);
+
+    // Finalize the mesh
+    mesh.FinalizeQuadMesh(1);
 
     // 3. Define a finite element space on the mesh.
     int order = 1;
@@ -29,8 +40,17 @@ int main(int argc, char *argv[])
 
     // 4. Define a grid function and project some function into the FEM space.
     GridFunction gf(fespace);
-    FunctionCoefficient initial_solution([](const Vector &x) { return sin(M_PI * x[0]) * sin(M_PI * x[1]); });
+    FunctionCoefficient initial_solution([](const Vector &x) {
+        return sin(x[0]) + sin(x[1]);
+    });
     gf.ProjectCoefficient(initial_solution);
+
+    // Debug: Output the grid function values at the nodes
+    cout << "Grid function values at nodes:" << endl;
+    for (int i = 0; i < gf.Size(); ++i)
+    {
+        cout << "Node " << i << ": " << gf[i] << endl;
+    }
 
     // 5. Define a callable function using the grid function.
     auto eval_function = [&gf, fespace](const Vector &x)
@@ -47,13 +67,17 @@ int main(int argc, char *argv[])
         Array<IntegrationPoint> ips(1);
 
         // Find the element containing the point
-        fespace->GetMesh()->FindPoints(point_mat, elem_ids, ips);
+        int found = fespace->GetMesh()->FindPoints(point_mat, elem_ids, ips);
 
-        if (elem_ids[0] < 0)
+        if (found <= 0 || elem_ids[0] < 0)
         {
             cerr << "Point not found in the mesh." << endl;
             return 0.0;
         }
+
+        // Debug: Output the found element ID and integration point
+        cout << "Element ID: " << elem_ids[0] << ", Integration Point: ("
+             << ips[0].x << ", " << ips[0].y << ")" << endl;
 
         // Get the transformation of the element
         ElementTransformation *T = fespace->GetElementTransformation(elem_ids[0]);
