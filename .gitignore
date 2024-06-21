@@ -54,3 +54,4 @@ src/*/*/version.f90
 # Ignore files created by the python build system
 *.egg-info/
 *.msh
+**/node_modules/
