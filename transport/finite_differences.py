@@ -1,21 +1,23 @@
-import numpy as np
+from jax import jit
+import jax.numpy as np
 
-class FiniteDifferenceFunction:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+def create_finite_difference_function(xmin, xmax, y):
+    return {
+        "xmin": xmin,
+        "xmax": xmax,
+        "dx": (xmax - xmin)/(len(y) - 1),
+        "y": y
+    }
 
-def diffusive_flux(nh, diffusivity):
-    return FiniteDifferenceFunction(nh.x,
-        -diffusivity * grad(nh)
-    )
+@jit
+def diffusive_flux(f, diffusivity):
+    return {
+        "xmin": f["xmin"],
+        "xmax": f["xmax"],
+        "dx": f["dx"],
+        "y": -np.gradient(diffusivity*np.gradient(f["y"])/f["dx"])/f["dx"]
+    }
 
-def grad(nh):
-    return FiniteDifferenceFunction(nh.x,
-        np.gradient(nh.y, nh.x)
-    )
-
-def div(gh):
-    return FiniteDifferenceFunction(gh.x,
-        np.gradient(gh.y, gh.x)
-    )
+@jit
+def evaluate(f):
+    return f["y"]
