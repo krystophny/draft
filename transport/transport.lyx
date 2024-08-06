@@ -1,0 +1,386 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+\lang british
+\begin_inset FormulaMacro
+\newcommand{\v}[1]{\boldsymbol{#1}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\T}[1]{\hat{#1}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\d}{\text{d}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\i}{\text{i}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\t}{\text{t}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\nutens}{\T{\nu}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\mutens}{\T{\mu}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\v}[1]{\boldsymbol{#1}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\d}{\text{d}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\i}{\text{i}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\t}{\text{t}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\ph}{\varphi}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\tht}{\vartheta}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\bJ}{\boldsymbol{J}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\bGamma}{\boldsymbol{\Gamma}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\bOmega}{\boldsymbol{\Omega}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\d}{\text{d}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\t}[1]{\text{#1}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\m}{\text{m}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\bm}{\text{\textbf{m}}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\k}{\text{k}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\i}{\text{i}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\newcommand{\c}{\text{c}}
+\end_inset
+
+
+\begin_inset FormulaMacro
+\renewcommand{\v}[1]{\boldsymbol{#1}}
+\end_inset
+
+
+\lang english
+
+\begin_inset FormulaMacro
+\newcommand{\difp}[2]{\frac{\partial#1}{\partial#2}}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our goal is to determine diffusive transport coefficients 
+\begin_inset Formula $D_{ij}(r,t)$
+\end_inset
+
+ and source strength 
+\begin_inset Formula $q(r,t)$
+\end_inset
+
+ from measured profile data 
+\begin_inset Formula $n(r,t),T(r,t)$
+\end_inset
+
+ and 
+\begin_inset Formula $\Phi_{e}(r,t)$
+\end_inset
+
+.
+ For an example in literature, see, e.g.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://link.springer.com/article/10.1007/BF01128152"
+
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Generally, this means solving an inverse problem for a set of transport
+ equations
+\begin_inset Formula 
+\[
+\difp{a_{i}(r,t)}t-\frac{1}{S}\difp{}r\left(S\right)
+\]
+
+\end_inset
+
+This equation follows from the flux-surface average of a general conservation
+ law
+\begin_inset Formula 
+\[
+\difp{a_{i}(r,t)}t-\frac{1}{\sqrt{g}}\difp{}{x^{k}}\left(\sqrt{g}\Gamma_{a_{i}}^{k}(r,t)\right)=q_{i}(r,t)
+\]
+
+\end_inset
+
+with divergence in curvilinear coordinates, and a diffusive ansatz 
+\begin_inset Formula 
+\[
+\Gamma_{a_{i}}^{r}=-D_{ij}\difp{a_{j}}r
+\]
+
+\end_inset
+
+for radial fluxes.
+ Here we start from simple examples.
+\end_layout
+
+\begin_layout Section
+Density only, stationary case, Cartesian x
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+-\frac{\d}{\d x}\left(D(x)\frac{\d n(x)}{\d x}\right)=q(x).
+\end{equation}
+
+\end_inset
+
+For constant coefficients 
+\begin_inset Formula $D(x)=D$
+\end_inset
+
+ and sources 
+\begin_inset Formula $q(x)=q$
+\end_inset
+
+ over space we have the solution
+\begin_inset Formula 
+\begin{equation}
+n(x)=-\frac{q}{2D}x^{2}+c_{1}x+c_{2}.
+\end{equation}
+
+\end_inset
+
+The coefficient in front of 
+\begin_inset Formula $x^{2}$
+\end_inset
+
+ is determined by 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $D$
+\end_inset
+
+.
+ Changing 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $D$
+\end_inset
+
+ while leaving 
+\begin_inset Formula $q/D$
+\end_inset
+
+ constant doesn't change the result.
+ Free constants 
+\begin_inset Formula $c_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{2}$
+\end_inset
+
+ follow from boundary conditions.
+ 
+\end_layout
+
+\begin_layout Section
+Density only, stationary case, cylinder 
+\begin_inset Quotes eld
+\end_inset
+
+small
+\begin_inset Quotes erd
+\end_inset
+
+ r
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+-\frac{1}{r}\frac{\d}{\d r}\left(rD(r)\frac{\d n(r)}{\d r}\right)=q(r).
+\end{equation}
+
+\end_inset
+
+For constant 
+\begin_inset Formula $D$
+\end_inset
+
+ and 
+\begin_inset Formula $q$
+\end_inset
+
+ we have the solution
+\begin_inset Formula 
+\begin{equation}
+n(r)=-\frac{q}{4D}r^{2}+c_{1}\ln r+c_{2}.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
