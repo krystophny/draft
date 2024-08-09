@@ -1,53 +1,51 @@
 #%%
 import numpy as np
-import matplotlib.pyplot as plt
-from standard_map import standard_map
+from numpy.linalg import lstsq
+from numba import njit
 
-nmap = 1000
+np.random.seed(42)
 
-x = np.zeros((2, nmap))
-x[:,0] = [-0.5*np.pi, 0.92*2*np.pi]
+def fourier_coefficients(x, M):
+    num_dim = x.shape[0]
+    num_samples = x.shape[1]
 
-for i in range(1, nmap):
-    standard_map(x[:,i-1], x[:,i])
+    theta = np.arctan2(x[1, :], x[0, :])
+    A = design_matrix(theta, M)
 
-x[1,:] = np.mod(x[1,:] + np.pi, 2*np.pi) - np.pi
+    x_c = np.zeros((num_dim, M + 1))
+    x_s = np.zeros((num_dim, M + 1))
 
-plt.figure()
-plt.plot(x[0,:], x[1,:], ',')
-plt.xlim([0, 2*np.pi])
-plt.ylim([-np.pi, np.pi])
+    for d in range(num_dim):
+        coeffs, _, _, _ = lstsq(A, x[d, :], rcond=1e-4)
+        x_c[d, :] = coeffs[::2]
+        x_s[d, :] = coeffs[1::2]
 
+    return x_c, x_s
 
-R0 = 10.0
-def r0(x):
-    return 5.0
-
-R = R0 + (r0(x) + x[1,:])*np.cos(x[0,:])
-Z = (r0(x) + x[1,:])*np.sin(x[0,:])
-
-plt.figure()
-plt.plot(R, Z, ',')
-plt.xlim([R0-2*np.pi, R0+2*np.pi])
-plt.ylim([-2*np.pi, 2*np.pi])
-
-RZmid0 = np.zeros(2)
-RZmid0[0] = np.mean(R)
-RZmid0[1] = np.mean(Z)
-plt.plot(RZmid0[0], RZmid0[1], 'x')
+@njit
+def design_matrix(theta, M):
+    A = np.zeros((len(theta), 2 * (M + 1)))
+    for m in range(M + 1):
+        A[:, 2 * m] = np.cos(m * theta)
+        A[:, 2 * m + 1] = np.sin(m * theta)
+    return A
 
 
+@njit
+def evaluate_fourier_series(x_c, x_s, theta):
+    M = x_c.shape[1] - 1
+    N = len(theta)
+    x = np.zeros((2, N))
+    for n in range(N):
+        for m in range(M + 1):
+            x[:,n] += x_c[:,m] * np.cos(m * theta[n]) + x_s[:,m] * np.sin(m * theta[n])
+    return x
 
-RZtest = np.zeros((2, 100))
-RZtest[0,:] = np.linspace(R0-2*np.pi, R0+2*np.pi, 100)
-plt.plot(RZtest[0,:], RZtest[1,:], '-')
 
-RZdist = np.zeros(100)
-for i in range(100):
-    RZdist[i] = np.sum((RZtest[0,i] - R)**2 + (RZtest[1,i] - Z)**2)
-
-# %%
-plt.figure()
-plt.plot(RZtest[0,:], RZdist, '-')
-
-# %%
+@njit
+def generate_circle_points(theta, radius=1.0, center=(1, 0), noise_level=0.1):
+    n_points = len(theta)
+    x = np.zeros((2, n_points))
+    x[0,:] = center[0] + radius * np.cos(theta) + noise_level * np.random.normal(0, 1, n_points)
+    x[1,:] = center[1] + radius * np.sin(theta) + noise_level * np.random.normal(0, 1, n_points)
+    return x
