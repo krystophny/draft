@@ -25,8 +25,12 @@ xtrain = np.zeros((2, nmap))
 M = 64
 x0 = 0.0
 r0 = 2.0
-xtrain[0,:] = -(x[1,:] + r0)*np.cos(x[0,:]) - x0
-xtrain[1,:] = (x[1,:] + r0)*np.sin(x[0,:])
+
+def rscale(th):
+    return 1.0 - 0.4*np.sin(2*th + 0.3*np.pi)
+
+xtrain[0,:] = -(x[1,:] + r0)*rscale(x[0,:])*np.cos(x[0,:]) - x0
+xtrain[1,:] = (x[1,:] + r0)*rscale(x[0,:])*np.sin(x[0,:])
 
 x_c, x_s = fourier_coefficients(xtrain, M)
 theta = np.linspace(0, 2 * np.pi, 100)
