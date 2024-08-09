@@ -49,7 +49,7 @@ num_samples = 10000  # Number of Monte Carlo samples
 
 # random theta
 theta = np.random.uniform(0, 2 * np.pi, num_samples)
-xtrain = generate_circle_points(theta, radius=1.0, center=(0.0, 0.0), noise_level=0.01)
+xtrain = generate_circle_points(theta, radius=rscale, center=(0.0, 0.0), noise_level=0.01)
 
 #x_c, x_s = monte_carlo_coefficients(xtrain, M)
 x_c, x_s = fourier_coefficients(xtrain, M)

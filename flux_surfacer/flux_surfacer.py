@@ -42,10 +42,13 @@ def evaluate_fourier_series(x_c, x_s, theta):
     return x
 
 
-@njit
-def generate_circle_points(theta, radius=1.0, center=(1, 0), noise_level=0.1):
+def unity(theta):
+    return 1.0
+
+
+def generate_circle_points(theta, radius=unity, center=(1, 0), noise_level=0.1):
     n_points = len(theta)
     x = np.zeros((2, n_points))
-    x[0,:] = center[0] + radius * np.cos(theta) + noise_level * np.random.normal(0, 1, n_points)
-    x[1,:] = center[1] + radius * np.sin(theta) + noise_level * np.random.normal(0, 1, n_points)
+    x[0,:] = center[0] + radius(theta) * np.cos(theta) + noise_level * np.random.normal(0, 1, n_points)
+    x[1,:] = center[1] + radius(theta) * np.sin(theta) + noise_level * np.random.normal(0, 1, n_points)
     return x
