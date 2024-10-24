@@ -55,3 +55,6 @@ src/*/*/version.f90
 *.egg-info/
 *.msh
 **/node_modules/
+spec/.2DOF_targetIotaAndVolume_000_000000.sp.DF
+spec/2DOF_targetIotaAndVolume_000_000000.sp.h5
+spec/2DOF_targetIotaAndVolume_000_000000.sp.end
