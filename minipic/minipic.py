@@ -1,6 +1,8 @@
 import numpy as np
 from numba import njit
 
+from minifem import *
+
 @njit
 def main_loop(x, p, phi_h, x_plot, p_plot, n_steps, plot_every, dt):
     for i in np.arange(1, n_steps-1):
@@ -18,11 +20,11 @@ def timestep(x, p, phi_h, dt):
 
 @njit
 def compute_E_at(x, phi_h, E):
-    return compute_multiple(compute_E_at_single, x, phi_h, E)
+    compute_multiple(compute_E_at_single, x, phi_h, E)
 
 @njit
 def compute_phi_at(x, phi_h, phi):
-    return compute_multiple(compute_phi_at_single, x, phi_h, phi)
+    compute_multiple(compute_phi_at_single, x, phi_h, phi)
 
 @njit
 def compute_E_at_single(x, phi_h):
@@ -34,13 +36,8 @@ def compute_E_at_single(x, phi_h):
 
 @njit
 def compute_phi_at_single(x, phi_h):
-    N = len(phi_h)
-    dx = 1.0 / N
-    x = x % 1.0
-    i = int(x // dx)
-    x_i = i * dx
-    x_ip1 = (i + 1) % N * dx
-    return linear_interpolation(x, x_i, x_ip1, phi_h[i], phi_h[(i + 1) % N])
+    return evaluate(x, phi_h)
+
 
 @njit
 def compute_multiple(func, x, phi_h, result):
