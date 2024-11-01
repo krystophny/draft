@@ -24,9 +24,6 @@ x_grid = np.linspace(0, 1, n_grid)
 def phi0(x):
     return np.cos(2*np.pi*(x-0.5))
 phi_h = project(phi0)
-test = evaluate(np.linspace(0.1,0.9,100), phi_h)
-
-#plt.plot(test)
 
 plot_phi(x_grid, phi_h)
 
