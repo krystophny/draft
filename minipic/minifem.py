@@ -6,10 +6,28 @@ element_order = 3
 num_nodes = num_elements * element_order
 
 @njit
-def evaluate(x, coefficients):
-    projection = np.zeros_like(x)
-    nodes = lagrange_basis_nodes(element_order)
+def lagrange_basis_nodes(order):
+    return np.linspace(0, 1, order + 1)
 
+@njit
+def lagrange_basis(x, order, i, nodes):
+    value = 1.0
+    for j in range(order + 1):
+        if i != j:
+            value *= (x - nodes[j]) / (nodes[i] - nodes[j])
+    return value
+
+@njit
+def gauss_legendre_quadrature():
+    points = np.array([0.1127016653792583, 0.5, 0.8872983346207417])
+    weights = np.array([0.2777777777777778, 0.4444444444444444, 0.2777777777777778])
+    return points, weights
+
+nodes = lagrange_basis_nodes(element_order)
+
+@njit
+def evaluate(x, coefficients, result):
+    result[:] = 0.0
     for element in range(num_elements):
         element_start = element * element_order
         for i in range(element_order + 1):
@@ -20,8 +38,7 @@ def evaluate(x, coefficients):
                 y = x[k]
                 if element / num_elements <= y < (element + 1) / num_elements:
                     x_mapped = (y - element / num_elements) * num_elements
-                    projection[k] += coefficients[global_i] * lagrange_basis(x_mapped, element_order, i, nodes)
-    return projection
+                    result[k] += coefficients[global_i] * lagrange_basis(x_mapped, element_order, i, nodes)
 
 @njit
 def project(target_function):
@@ -33,7 +50,6 @@ def project(target_function):
 @njit
 def assemble_mass_matrix():
     mass_matrix = np.zeros((num_nodes, num_nodes))
-    nodes = lagrange_basis_nodes(element_order)
     quad_points, quad_weights = gauss_legendre_quadrature()
 
     for element in range(num_elements):
@@ -54,7 +70,6 @@ def assemble_mass_matrix():
 @njit
 def assemble_rhs(target_function):
     rhs = np.zeros(num_nodes)
-    nodes = lagrange_basis_nodes(element_order)
     quad_points, quad_weights = gauss_legendre_quadrature()
 
     for element in range(num_elements):
@@ -70,21 +85,3 @@ def assemble_rhs(target_function):
             rhs[global_i] += b_i
 
     return rhs
-
-@njit
-def lagrange_basis_nodes(order):
-    return np.linspace(0, 1, order + 1)
-
-@njit
-def lagrange_basis(x, order, i, nodes):
-    value = 1.0
-    for j in range(order + 1):
-        if i != j:
-            value *= (x - nodes[j]) / (nodes[i] - nodes[j])
-    return value
-
-@njit
-def gauss_legendre_quadrature():
-    points = np.array([0.1127016653792583, 0.5, 0.8872983346207417])
-    weights = np.array([0.2777777777777778, 0.4444444444444444, 0.2777777777777778])
-    return points, weights

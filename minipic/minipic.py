@@ -24,7 +24,7 @@ def compute_E_at(x, phi_h, E):
 
 @njit
 def compute_phi_at(x, phi_h, phi):
-    compute_multiple(compute_phi_at_single, x, phi_h, phi)
+     evaluate(x, phi_h, phi)
 
 @njit
 def compute_E_at_single(x, phi_h):
@@ -33,11 +33,6 @@ def compute_E_at_single(x, phi_h):
     x = x % 1.0
     i = int(x // dx)
     return (phi_h[(i + 1) % N] - phi_h[i]) / dx
-
-@njit
-def compute_phi_at_single(x, phi_h):
-    return evaluate(x, phi_h)
-
 
 @njit
 def compute_multiple(func, x, phi_h, result):

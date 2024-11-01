@@ -9,7 +9,8 @@ def f(x):
 def test_project_eval():
     f_h = project(f)
     x_eval = np.linspace(0.01, 0.99, 100)
-    f_eval = evaluate(x_eval, f_h)
+    f_eval = np.empty_like(x_eval)
+    evaluate(x_eval, f_h, f_eval)
     f_ref = f(x_eval)
     f_err = f_ref - f_eval
 
