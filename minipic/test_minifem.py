@@ -65,7 +65,7 @@ import matplotlib.pyplot as plt
 x_fine = np.linspace(0, 1, 500)
 phi_fine = np.empty_like(x_fine)
 evaluate(x_fine, phi_h, phi_fine)
-plt.plot(x_fine, phi_fine/100, label="Numerical")
+plt.plot(x_fine, phi_fine, label="Numerical")
 plt.plot(x_fine, phi(x_fine), label="Exact")
 plt.legend()
 
