@@ -2,33 +2,22 @@ import numpy as np
 from numba import njit
 
 num_elements = 9
-element_order = 3
-num_nodes = num_elements * element_order
-nodes = np.linspace(0, 1, element_order + 1)
+order = 3
+num_nodes = num_elements * order
+nodes = np.linspace(0, 1, order + 1)
 
-
-@njit
-def evaluate_derivative(x, coefficients, result):
-    result[:] = 0.0
-    for element in range(num_elements):
-        element_start = element * element_order
-        for i in range(element_order + 1):
-            global_i = element_start + i
-            if global_i >= num_nodes:
-                global_i -= num_nodes
-            for k in range(len(x)):
-                y = x[k]
-                if element / num_elements <= y < (element + 1) / num_elements:
-                    x_mapped = (y - element / num_elements) * num_elements
-                    result[k] += coefficients[global_i] * lagrange_basis_derivative(x_mapped, element_order, i, nodes) * num_elements
+def solve_poisson(rho, phi_h):
+    stiffness_matrix = assemble_stiffness_matrix()
+    rhs = assemble_rhs(rho)
+    phi_h[:] = np.linalg.solve(stiffness_matrix, rhs)
 
 
 @njit
 def evaluate(x, coefficients, result):
     result[:] = 0.0
     for element in range(num_elements):
-        element_start = element * element_order
-        for i in range(element_order + 1):
+        element_start = element * order
+        for i in range(order + 1):
             global_i = element_start + i
             if global_i >= num_nodes:
                 global_i -= num_nodes
@@ -36,7 +25,24 @@ def evaluate(x, coefficients, result):
                 y = x[k]
                 if element / num_elements <= y < (element + 1) / num_elements:
                     x_mapped = (y - element / num_elements) * num_elements
-                    result[k] += coefficients[global_i] * lagrange_basis(x_mapped, element_order, i, nodes)
+                    result[k] += coefficients[global_i] * lagrange_basis(x_mapped, i)
+
+
+@njit
+def evaluate_derivative(x, coefficients, result):
+    result[:] = 0.0
+    for element in range(num_elements):
+        element_start = element * order
+        for i in range(order + 1):
+            global_i = element_start + i
+            if global_i >= num_nodes:
+                global_i -= num_nodes
+            for k in range(len(x)):
+                y = x[k]
+                if element / num_elements <= y < (element + 1) / num_elements:
+                    x_mapped = (y - element / num_elements) * num_elements
+                    result[k] += coefficients[global_i] * lagrange_basis_derivative(x_mapped, i) * num_elements
+
 
 
 @njit
@@ -48,43 +54,34 @@ def project(target_function):
 
 
 @njit
-def assemble_stiffness_matrix():
-    stiffness_matrix = np.zeros((num_nodes, num_nodes))
+def assemble_matrix(basis1, basis2):
+    matrix = np.zeros((num_nodes, num_nodes))
     quad_points, quad_weights = gauss_legendre_quadrature()
 
     for element in range(num_elements):
-        for i in range(element_order + 1):
-            for j in range(element_order + 1):
-                K_ij = 0.0
-                for q in range(len(quad_points)):
-                    x_q = quad_points[q]
-                    weight = quad_weights[q]
-                    K_ij += weight * lagrange_basis_derivative(x_q, element_order, i, nodes) * lagrange_basis_derivative(x_q, element_order, j, nodes)
-
-                global_i = (element * element_order + i) % num_nodes
-                global_j = (element * element_order + j) % num_nodes
-                stiffness_matrix[global_i, global_j] += K_ij
-    return stiffness_matrix
-
-
-@njit
-def assemble_mass_matrix():
-    mass_matrix = np.zeros((num_nodes, num_nodes))
-    quad_points, quad_weights = gauss_legendre_quadrature()
-
-    for element in range(num_elements):
-        for i in range(element_order + 1):
-            for j in range(element_order + 1):
+        for i in range(order + 1):
+            for j in range(order + 1):
                 M_ij = 0.0
                 for q in range(len(quad_points)):
                     x_q = quad_points[q]
                     weight = quad_weights[q]
-                    M_ij += weight * lagrange_basis(x_q, element_order, i, nodes) * lagrange_basis(x_q, element_order, j, nodes)
+                    M_ij += weight * basis1(x_q, i) * basis2(x_q, j)
 
-                global_i = (element * element_order + i) % num_nodes
-                global_j = (element * element_order + j) % num_nodes
-                mass_matrix[global_i, global_j] += M_ij
-    return mass_matrix
+                global_i = (element * order + i) % num_nodes
+                global_j = (element * order + j) % num_nodes
+                matrix[global_i, global_j] += M_ij
+
+    return matrix
+
+
+@njit
+def assemble_stiffness_matrix():
+    return assemble_matrix(lagrange_basis_derivative, lagrange_basis_derivative)
+
+
+@njit
+def assemble_mass_matrix():
+    return assemble_matrix(lagrange_basis, lagrange_basis)
 
 
 @njit
@@ -93,22 +90,22 @@ def assemble_rhs(target_function):
     quad_points, quad_weights = gauss_legendre_quadrature()
 
     for element in range(num_elements):
-        for i in range(element_order + 1):
+        for i in range(order + 1):
             b_i = 0.0
             for q in range(len(quad_points)):
                 x_q = quad_points[q]
                 weight = quad_weights[q]
                 x_mapped = element / num_elements + x_q / num_elements
-                b_i += weight * target_function(x_mapped) * lagrange_basis(x_q, element_order, i, nodes)
+                b_i += weight * target_function(x_mapped) * lagrange_basis(x_q, i)
 
-            global_i = (element * element_order + i) % num_nodes
+            global_i = (element * order + i) % num_nodes
             rhs[global_i] += b_i
 
     return rhs
 
 
 @njit
-def lagrange_basis(x, order, i, nodes):
+def lagrange_basis(x, i):
     value = 1.0
     for j in range(order + 1):
         if i != j:
@@ -117,7 +114,7 @@ def lagrange_basis(x, order, i, nodes):
 
 
 @njit
-def lagrange_basis_derivative(x, order, i, nodes):
+def lagrange_basis_derivative(x, i):
     derivative = 0.0
     for j in range(order + 1):
         if i != j:

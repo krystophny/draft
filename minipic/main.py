@@ -10,7 +10,7 @@ np.random.seed(42)
 
 n_particles = 1000
 n_grid = num_elements
-order = element_order
+order = order
 n_steps = 10000
 n_plot = 1000
 plot_every = n_steps // n_plot
