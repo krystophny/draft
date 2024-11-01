@@ -6,31 +6,6 @@ element_order = 3
 num_nodes = num_elements * element_order
 nodes = np.linspace(0, 1, element_order + 1)
 
-@njit
-def lagrange_basis(x, order, i, nodes):
-    value = 1.0
-    for j in range(order + 1):
-        if i != j:
-            value *= (x - nodes[j]) / (nodes[i] - nodes[j])
-    return value
-
-@njit
-def lagrange_basis_derivative(x, order, i, nodes):
-    derivative = 0.0
-    for j in range(order + 1):
-        if i != j:
-            term = 1.0 / (nodes[i] - nodes[j])
-            for k in range(order + 1):
-                if k != i and k != j:
-                    term *= (x - nodes[k]) / (nodes[i] - nodes[k])
-            derivative += term
-    return derivative
-
-@njit
-def gauss_legendre_quadrature():
-    points = np.array([0.1127016653792583, 0.5, 0.8872983346207417])
-    weights = np.array([0.2777777777777778, 0.4444444444444444, 0.2777777777777778])
-    return points, weights
 
 @njit
 def evaluate_derivative(x, coefficients, result):
@@ -63,12 +38,34 @@ def evaluate(x, coefficients, result):
                     x_mapped = (y - element / num_elements) * num_elements
                     result[k] += coefficients[global_i] * lagrange_basis(x_mapped, element_order, i, nodes)
 
+
 @njit
 def project(target_function):
     rhs = assemble_rhs(target_function)
     mass_matrix = assemble_mass_matrix()
     projected_values = np.linalg.solve(mass_matrix, rhs)
     return projected_values
+
+
+@njit
+def assemble_stiffness_matrix():
+    stiffness_matrix = np.zeros((num_nodes, num_nodes))
+    quad_points, quad_weights = gauss_legendre_quadrature()
+
+    for element in range(num_elements):
+        for i in range(element_order + 1):
+            for j in range(element_order + 1):
+                K_ij = 0.0
+                for q in range(len(quad_points)):
+                    x_q = quad_points[q]
+                    weight = quad_weights[q]
+                    K_ij += weight * lagrange_basis_derivative(x_q, element_order, i, nodes) * lagrange_basis_derivative(x_q, element_order, j, nodes)
+
+                global_i = (element * element_order + i) % num_nodes
+                global_j = (element * element_order + j) % num_nodes
+                stiffness_matrix[global_i, global_j] += K_ij
+    return stiffness_matrix
+
 
 @njit
 def assemble_mass_matrix():
@@ -108,3 +105,32 @@ def assemble_rhs(target_function):
             rhs[global_i] += b_i
 
     return rhs
+
+
+@njit
+def lagrange_basis(x, order, i, nodes):
+    value = 1.0
+    for j in range(order + 1):
+        if i != j:
+            value *= (x - nodes[j]) / (nodes[i] - nodes[j])
+    return value
+
+
+@njit
+def lagrange_basis_derivative(x, order, i, nodes):
+    derivative = 0.0
+    for j in range(order + 1):
+        if i != j:
+            term = 1.0 / (nodes[i] - nodes[j])
+            for k in range(order + 1):
+                if k != i and k != j:
+                    term *= (x - nodes[k]) / (nodes[i] - nodes[k])
+            derivative += term
+    return derivative
+
+
+@njit
+def gauss_legendre_quadrature():
+    points = np.array([0.1127016653792583, 0.5, 0.8872983346207417])
+    weights = np.array([0.2777777777777778, 0.4444444444444444, 0.2777777777777778])
+    return points, weights
