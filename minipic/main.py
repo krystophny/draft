@@ -3,10 +3,12 @@ import numpy as np
 from minipic import *
 from plotting import *
 
+np.random.seed(42)
+
 n_particles = 1000
-n_grid = 100
+n_grid = 1000
 n_steps = 100000
-n_plot = 1000
+n_plot = 10000
 plot_every = n_steps // n_plot
 dt = 0.01
 
@@ -30,6 +32,6 @@ plot_phi(x_grid, phi_h)
 plot_particles(x, p)
 
 #%%
-plot_orbit(x_plot[:,0], p_plot[:,0])
+plot_orbit(x_plot[:,:3], p_plot[:,:3])
 
 # %%

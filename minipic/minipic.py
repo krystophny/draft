@@ -21,8 +21,8 @@ def compute_E_at(x, phi_h, E):
     return compute_multiple(compute_E_at_single, x, phi_h, E)
 
 @njit
-def compute_phi_at(x, phi_h):
-    return compute_multiple(compute_phi_at_single, x, phi_h, E)
+def compute_phi_at(x, phi_h, phi):
+    return compute_multiple(compute_phi_at_single, x, phi_h, phi)
 
 @njit
 def compute_E_at_single(x, phi_h):
