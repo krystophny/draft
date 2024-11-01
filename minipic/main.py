@@ -11,8 +11,8 @@ np.random.seed(42)
 n_particles = 1000
 n_grid = num_elements
 order = element_order
-n_steps = 100000
-n_plot = 10000
+n_steps = 10000
+n_plot = 1000
 plot_every = n_steps // n_plot
 dt = 0.01
 
@@ -37,7 +37,6 @@ x_plot[0, :] = x
 p_plot[0, :] = p
 
 main_loop(x, p, phi_h, x_plot, p_plot, n_steps, plot_every, dt)
-
 
 #%%
 plot_particles(x, p)

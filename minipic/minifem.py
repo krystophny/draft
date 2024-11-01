@@ -1,13 +1,10 @@
 import numpy as np
 from numba import njit
 
-num_elements = 3
+num_elements = 9
 element_order = 3
 num_nodes = num_elements * element_order
-
-@njit
-def lagrange_basis_nodes(order):
-    return np.linspace(0, 1, order + 1)
+nodes = np.linspace(0, 1, element_order + 1)
 
 @njit
 def lagrange_basis(x, order, i, nodes):
@@ -29,19 +26,14 @@ def lagrange_basis_derivative(x, order, i, nodes):
             derivative += term
     return derivative
 
-
-
 @njit
 def gauss_legendre_quadrature():
     points = np.array([0.1127016653792583, 0.5, 0.8872983346207417])
     weights = np.array([0.2777777777777778, 0.4444444444444444, 0.2777777777777778])
     return points, weights
 
-nodes = lagrange_basis_nodes(element_order)
-
 @njit
 def evaluate_derivative(x, coefficients, result):
-    num_nodes = len(coefficients)
     result[:] = 0.0
     for element in range(num_elements):
         element_start = element * element_order
