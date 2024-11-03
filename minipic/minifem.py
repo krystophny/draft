@@ -8,49 +8,41 @@ nodes = np.linspace(0, 1, order + 1)
 
 def solve_poisson(rho, phi_h):
     stiffness_matrix = assemble_stiffness_matrix()
-    rhs = assemble_rhs(rho)
+    rhs = assemble_rhs(rho, basis)
     phi_h[:] = np.linalg.solve(stiffness_matrix, rhs)
-
-
-@njit
-def evaluate(x, coefficients, result):
-    result[:] = 0.0
-    for element in range(num_elements):
-        element_start = element * order
-        for i in range(order + 1):
-            global_i = element_start + i
-            if global_i >= num_nodes:
-                global_i -= num_nodes
-            for k in range(len(x)):
-                y = x[k]
-                if element / num_elements <= y < (element + 1) / num_elements:
-                    x_mapped = (y - element / num_elements) * num_elements
-                    result[k] += coefficients[global_i] * lagrange_basis(x_mapped, i)
-
-
-@njit
-def evaluate_derivative(x, coefficients, result):
-    result[:] = 0.0
-    for element in range(num_elements):
-        element_start = element * order
-        for i in range(order + 1):
-            global_i = element_start + i
-            if global_i >= num_nodes:
-                global_i -= num_nodes
-            for k in range(len(x)):
-                y = x[k]
-                if element / num_elements <= y < (element + 1) / num_elements:
-                    x_mapped = (y - element / num_elements) * num_elements
-                    result[k] += coefficients[global_i] * lagrange_basis_derivative(x_mapped, i) * num_elements
-
-
 
 @njit
 def project(target_function):
-    rhs = assemble_rhs(target_function)
+    rhs = assemble_rhs(target_function, basis)
     mass_matrix = assemble_mass_matrix()
     projected_values = np.linalg.solve(mass_matrix, rhs)
     return projected_values
+
+
+@njit
+def assemble_stiffness_matrix():
+    return assemble_matrix(basis_derivative, basis_derivative)
+
+
+@njit
+def assemble_mass_matrix():
+    return assemble_matrix(basis, basis)
+
+
+@njit
+def evaluate(x, basis, coefficients, result):
+    result[:] = 0.0
+    for element in range(num_elements):
+        element_start = element * order
+        for i in range(order + 1):
+            global_i = element_start + i
+            if global_i >= num_nodes:
+                global_i -= num_nodes
+            for k in range(len(x)):
+                y = x[k]
+                if element / num_elements <= y < (element + 1) / num_elements:
+                    x_mapped = (y - element / num_elements) * num_elements
+                    result[k] += coefficients[global_i] * basis(x_mapped, i)
 
 
 @njit
@@ -75,17 +67,7 @@ def assemble_matrix(basis1, basis2):
 
 
 @njit
-def assemble_stiffness_matrix():
-    return assemble_matrix(lagrange_basis_derivative, lagrange_basis_derivative)
-
-
-@njit
-def assemble_mass_matrix():
-    return assemble_matrix(lagrange_basis, lagrange_basis)
-
-
-@njit
-def assemble_rhs(target_function):
+def assemble_rhs(target_function, basis):
     rhs = np.zeros(num_nodes)
     quad_points, quad_weights = gauss_legendre_quadrature()
 
@@ -96,34 +78,12 @@ def assemble_rhs(target_function):
                 x_q = quad_points[q]
                 weight = quad_weights[q]
                 x_mapped = element / num_elements + x_q / num_elements
-                b_i += weight * target_function(x_mapped) * lagrange_basis(x_q, i)
+                b_i += weight * target_function(x_mapped) * basis(x_q, i)
 
             global_i = (element * order + i) % num_nodes
             rhs[global_i] += b_i
 
     return rhs
-
-
-@njit
-def lagrange_basis(x, i):
-    value = 1.0
-    for j in range(order + 1):
-        if i != j:
-            value *= (x - nodes[j]) / (nodes[i] - nodes[j])
-    return value
-
-
-@njit
-def lagrange_basis_derivative(x, i):
-    derivative = 0.0
-    for j in range(order + 1):
-        if i != j:
-            term = 1.0 / (nodes[i] - nodes[j])
-            for k in range(order + 1):
-                if k != i and k != j:
-                    term *= (x - nodes[k]) / (nodes[i] - nodes[k])
-            derivative += term
-    return derivative
 
 
 @njit
