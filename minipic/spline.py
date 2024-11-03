@@ -1,8 +1,8 @@
 #%%
 import numpy as np
-from numba import jit
+from numba import njit
 
-@jit(nopython=True)
+@njit
 def single_bspline_hat(x, knots, degree, i):
     """Generates a single B-spline basis function."""
     n_knots = len(knots)
@@ -14,25 +14,28 @@ def single_bspline_hat(x, knots, degree, i):
         return left * single_bspline_hat(x, knots, degree - 1, i) + \
                right * single_bspline_hat(x, knots, degree - 1, i + 1)
 
+@njit
 def generate_periodic_bspline_basis(n, degree, x):
-    """Generates the set of periodic B-spline basis functions."""
-    dx = 1.0/(n + 1 + degree)
-    knots = np.arange(0, 1.0+3*dx, step=dx)
-    n_basis = len(knots) - degree - 1
-
+    n_basis = n + 1 + degree
     basis = np.zeros((len(x), n_basis))
 
     for i in range(n_basis):
-        basis[:, i] = single_bspline_hat(x, knots, degree, i)
+        evaluate_basis(n, degree, i, x, basis[:, i])
 
     return basis
 
-# Example usage:
-degree = 3
-n = 11  # Number of basis functions
-x = np.linspace(0, 1.5, 1000)
-basis = generate_periodic_bspline_basis(n, degree, x)
+@njit
+def evaluate_basis(n, degree, i, x, result):
+    """Evaluates the i-th B-spline basis function at the points x."""
+    dx = 1.0/(n + 1 + degree)
+    knots = np.linspace(0.0, 1.0 + degree*dx, n + 2*(1 + degree))
+    n_basis = len(knots) - degree - 1
+    if i < 0 or i >= n_basis:
+        result[:] = 0.0
 
-import matplotlib.pyplot as plt
-plt.plot(x, basis)
-# %%
+    if i > n:
+        y = x.copy()
+        y[x < (i-n)*dx] += 1.0
+        result[:] = single_bspline_hat(y, knots, degree, i)
+    else:
+        result[:] = single_bspline_hat(x, knots, degree, i)
