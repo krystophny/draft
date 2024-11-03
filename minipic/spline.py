@@ -1,4 +1,3 @@
-#%%
 import numpy as np
 from numba import njit
 
@@ -21,8 +20,8 @@ def bspline_hat(x, knots, degree, i):
     if degree == 0:
         return np.where((x >= knots[i]) & (x < knots[i + 1]), 1.0, 0.0)
     else:
-        left = (x - knots[i]) / (knots[i + degree] - knots[i] + 1e-10)
-        right = (knots[i + degree + 1] - x) / (knots[i + degree + 1] - knots[i + 1] + 1e-10)
+        left = (x - knots[i]) / (knots[i + degree] - knots[i])
+        right = (knots[i + degree + 1] - x) / (knots[i + degree + 1] - knots[i + 1])
         return left * bspline_hat(x, knots, degree - 1, i) + \
                right * bspline_hat(x, knots, degree - 1, i + 1)
 
@@ -34,8 +33,8 @@ def bspline_hat_derivative(x, knots, degree, i):
     if degree == 0:
         return np.where((x >= knots[i]) & (x < knots[i + 1]), 1.0, 0.0)
     else:
-        left = 1.0 / (knots[i + degree] - knots[i] + 1e-10)
-        right = -1.0 / (knots[i + degree + 1] - knots[i + 1] + 1e-10)
+        left = 1.0 / (knots[i + degree] - knots[i])
+        right = -1.0 / (knots[i + degree + 1] - knots[i + 1])
         return left * bspline_hat(x, knots, degree - 1, i) + \
                right * bspline_hat(x, knots, degree - 1, i + 1)
 
