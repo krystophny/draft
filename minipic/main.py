@@ -2,7 +2,7 @@
 import numpy as np
 from numba import njit
 
-from minifem import *
+from spline import *
 from minipic import *
 from plotting import *
 

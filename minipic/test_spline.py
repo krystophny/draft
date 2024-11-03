@@ -2,7 +2,28 @@ from spline import (
     generate,
     bspline_hat,
     bspline_hat_derivative,
+    init_knots,
+    assemble_matrix
 )
+
+n = 20
+degree = 5
+
+x = np.linspace(1e-13, 1.0-1e-13, 100)
+basis = generate(bspline_hat, n, degree, x)
+basis_der = generate(bspline_hat_derivative, n, degree, x)
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(x, basis[:, 0])
+plt.plot(x, basis[:, 1])
+plt.plot(x, basis[:, 2])
+plt.figure()
+plt.plot(x, basis_der)
+
+knots = init_knots(n, degree)
+M = assemble_matrix(bspline_hat, knots, degree)
+plt.figure()
+plt.imshow(np.log10(np.abs(M)))
 
 
 def test_partition_unity():
