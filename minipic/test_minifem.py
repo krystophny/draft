@@ -12,7 +12,7 @@ def dphidx(x):
 
 @njit
 def d2phidx2(x):
-    return -(2*np.pi)**2*phi(x)
+    return -(2*np.pi)**2*np.cos(2*np.pi*(x-0.5))
 
 @njit
 def rho(x):

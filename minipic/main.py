@@ -9,7 +9,7 @@ from plotting import *
 np.random.seed(42)
 
 n_particles = 1000
-n_grid = 5
+n_grid = 3
 order = 5
 n_steps = 10000
 n_plot = 1000
@@ -50,7 +50,6 @@ plt.plot(x_plot, phi_der_ref, '--')
 #plot_phi(x_grid, phi_h)
 
 #%%
-
 
 x_plot = np.empty((n_steps, n_particles))
 p_plot = np.empty((n_steps, n_particles))

@@ -1,10 +1,8 @@
-from spline import (
-    generate,
-    bspline_hat,
-    bspline_hat_derivative,
-    init_knots,
-    assemble_matrix
-)
+import numpy as np
+import matplotlib.pyplot as plt
+
+from numba import njit
+from spline import *
 
 n = 20
 degree = 3
@@ -37,37 +35,40 @@ def dphidx(x):
 
 @njit
 def d2phidx2(x):
-    return -(2*np.pi)**2*phi(x)
+    return -(2*np.pi)**2*np.cos(2*np.pi*(x-0.5))
 
 @njit
 def rho(x):
     return -d2phidx2(x)
 
-def test_solver():
-    solver = PoissonSolver(n, degree)
-    phi_h = solver.discretize(phi)
-    phi_ref = phi(x)
-    phi_num = solver.evaluate(phi_h, x)
-    assert np.allclose(phi_num, phi_ref, atol=1e-2, rtol=1e-2)
+#def test_solver():
+solver = PoissonSolver(n, degree)
+phi_h = solver.discretize(phi)
+phi_ref = phi(x)
+phi_num = solver.evaluate(phi_h, x)
+assert np.allclose(phi_num, phi_ref, atol=1e-2, rtol=1e-2)
 
-    dphi_ref = dphidx(x)
-    dphi_num = solver.evaluate_derivative(phi_h, x)
-    assert np.allclose(dphi_num, dphi_ref, atol=1e-2, rtol=1e-2)
+dphi_ref = dphidx(x)
+dphi_num = solver.evaluate_derivative(phi_h, x)
+assert np.allclose(dphi_num, dphi_ref, atol=1e-2, rtol=1e-2)
 
-    b = solver.assemble_rhs(rho)
-    plt.figure()
-    plt.plot(b)
-    plt.figure()
-    plt.plot(x, rho(x), '--')
+b = solver.assemble_rhs(rho)
+plt.figure()
+plt.plot(b)
+plt.figure()
+rho_h = np.linalg.solve(solver.mass_matrix, b)
+rho_num = solver.evaluate(rho_h, x)
+plt.plot(x, rho_num)
+plt.plot(x, rho(x), '--')
 
-    print(b)
-    plt.figure()
-    plt.plot(solver.stiffness_matrix[:, 0])
-    phi_sol = np.linalg.solve(solver.stiffness_matrix, b)
-    phi_sol_num = solver.evaluate(phi_sol, x)
-    plt.figure()
-    plt.plot(x, phi_sol_num)
-    plt.plot(x, phi(x), '--')
+print(b)
+plt.figure()
+plt.plot(solver.stiffness_matrix[:, 0])
+phi_sol = np.linalg.solve(solver.stiffness_matrix, b)
+phi_sol_num = solver.evaluate(phi_sol, x)
+plt.figure()
+plt.plot(x, phi_sol_num)
+plt.plot(x, phi(x), '--')
 
 
 if __name__ == "__main__":
