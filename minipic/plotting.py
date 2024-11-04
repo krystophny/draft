@@ -13,4 +13,4 @@ def plot_particles(x, p):
 def plot_orbit(x, p):
     plt.plot(x, p, ',')
     plt.xlim(0.0, 1.0)
-    plt.ylim(-2.0, 2.0)
+    plt.ylim(-3.0, 3.0)
