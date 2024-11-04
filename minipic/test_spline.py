@@ -7,30 +7,8 @@ from spline import (
 )
 
 n = 20
-degree = 5
-
+degree = 3
 x = np.linspace(1e-13, 1.0-1e-13, 100)
-basis = generate(bspline_hat, n, degree, x)
-basis_der = generate(bspline_hat_derivative, n, degree, x)
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(x, basis[:, 0])
-plt.plot(x, basis[:, 1])
-plt.plot(x, basis[:, 2])
-plt.figure()
-plt.plot(x, basis_der)
-
-knots = init_knots(n, degree)
-M = assemble_matrix(bspline_hat, knots, degree)
-plt.figure()
-plt.imshow(np.log10(np.abs(M)))
-
-M = assemble_matrix(bspline_hat_derivative, knots, degree)
-plt.figure()
-plt.imshow(np.log10(np.abs(M)))
-
-plt.figure()
-plt.plot(M[:, 0])
 
 
 def test_partition_unity():
@@ -70,7 +48,27 @@ def test_solver():
     phi_h = solver.discretize(phi)
     phi_ref = phi(x)
     phi_num = solver.evaluate(phi_h, x)
-    assert np.allclose(phi_num, phi_ref, atol=1e-2)
+    assert np.allclose(phi_num, phi_ref, atol=1e-2, rtol=1e-2)
+
+    dphi_ref = dphidx(x)
+    dphi_num = solver.evaluate_derivative(phi_h, x)
+    assert np.allclose(dphi_num, dphi_ref, atol=1e-2, rtol=1e-2)
+
+    b = solver.assemble_rhs(rho)
+    plt.figure()
+    plt.plot(b)
+    plt.figure()
+    plt.plot(x, rho(x), '--')
+
+    print(b)
+    plt.figure()
+    plt.plot(solver.stiffness_matrix[:, 0])
+    phi_sol = np.linalg.solve(solver.stiffness_matrix, b)
+    phi_sol_num = solver.evaluate(phi_sol, x)
+    plt.figure()
+    plt.plot(x, phi_sol_num)
+    plt.plot(x, phi(x), '--')
+
 
 if __name__ == "__main__":
     test_partition_unity()

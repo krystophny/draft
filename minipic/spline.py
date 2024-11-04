@@ -39,13 +39,14 @@ def bspline_hat_derivative(x, knots, degree, i):
     """Generates the derivative of a single B-spline basis function."""
     n_knots = len(knots)
     if degree == 0:
-        return np.where((x >= knots[i]) & (x < knots[i + 1]), 1.0, 0.0)
+        result = np.where((x >= knots[i]) & (x < knots[i + 1]), 1.0, 0.0)
     else:
         left = 1.0 / (knots[i + degree] - knots[i])
         right = -1.0 / (knots[i + degree + 1] - knots[i + 1])
-        return left * bspline_hat(
+        result = left * bspline_hat(
             x, knots, degree - 1, i
         ) + right * bspline_hat(x, knots, degree - 1, i + 1)
+    return result*degree
 
 
 @njit
@@ -79,7 +80,7 @@ def evaluate_basis(basis, n, degree, i, x, result):
 def gauss_legendre_quadrature():
     points = np.array([-0.7745966692414834, 0.0, 0.7745966692414834])
     weights = np.array(
-        [0.2777777777777778, 0.4444444444444444, 0.2777777777777778]
+        [0.5555555555555556, 0.8888888888888888, 0.5555555555555556]
     )
     return points, weights
 
@@ -96,7 +97,6 @@ def assemble_matrix(basis, knots, degree):
         end = knots[i + degree + 1]
 
         mapped_points = start + (end - start) * 0.5 * (quad_points + 1)
-        integrand_values = np.zeros_like(mapped_points)
 
         b_i = basis(mapped_points, knots, degree, 0)
         b_j = basis(mapped_points, knots, degree, i)
@@ -123,7 +123,6 @@ def assemble_vector(basis, f, knots, degree):
         end = knots[i + degree + 1]
 
         mapped_points = start + (end - start) * 0.5 * (quad_points + 1)
-        integrand_values = np.zeros_like(mapped_points)
 
         b_i = basis(mapped_points, knots, degree, i)
         integrand_values = f(mapped_points) * b_i
@@ -142,11 +141,11 @@ class PoissonSolver:
         self.mass_matrix = assemble_matrix(bspline_hat, self.knots, degree)
         self.stiffness_matrix = assemble_matrix(
             bspline_hat_derivative, self.knots, degree
-        )*self.degree**2
+        )
 
     def discretize(self, f):
-        M_times_b = assemble_vector(bspline_hat, f, self.knots, self.degree)
-        return np.linalg.solve(self.mass_matrix, M_times_b)
+        b = self.assemble_rhs(f)
+        return np.linalg.solve(self.mass_matrix, b)
 
     def evaluate(self, f_h, x):
         return np.sum(
@@ -160,4 +159,7 @@ class PoissonSolver:
             f_h
             * generate(bspline_hat_derivative, self.n, self.degree, x),
             axis=1,
-        )*self.degree
+        )
+
+    def assemble_rhs(self, f):
+        return assemble_vector(bspline_hat, f, self.knots, self.degree)
