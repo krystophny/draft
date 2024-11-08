@@ -1,14 +1,15 @@
 module field
 
 use, intrinsic :: iso_fortran_env, only: dp => real64
-use field_base, only: field_t
-use field_impl1, only: field_impl1_t
 
 implicit none
 
 contains
 
 function field_from_name(field_name)
+    use field_base, only: field_t
+    use field_impl1, only: field_impl1_t
+
     class(field_t), allocatable :: field_from_name
     character(*), intent(in) :: field_name
 

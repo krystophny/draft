@@ -81,8 +81,6 @@ message(STATUS "Python libraries: ${Python_LIBRARIES}")
 message(STATUS "Python binary output dir: ${CMAKE_CURRENT_BINARY_DIR}")
 
 set(FILES_TO_WRAP
-    src/field_base.f90
-    src/field_impl1.f90
     src/field.f90
 )
 
