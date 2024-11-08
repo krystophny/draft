@@ -153,7 +153,7 @@ add_library(${F2PY_MODULE_NAME} SHARED
 
 add_dependencies(${F2PY_MODULE_NAME} f90wrap_example)
 
-target_link_libraries(${F2PY_MODULE_NAME} PRIVATE ${Python_LIBRARIES} simple)
+target_link_libraries(${F2PY_MODULE_NAME} PRIVATE ${Python_LIBRARIES} f90wrap_example)
 
 set_target_properties(
     ${F2PY_MODULE_NAME}
@@ -162,18 +162,4 @@ set_target_properties(
     OUTPUT_NAME "${GENERATED_MODULE_FILE}"
     SUFFIX ".so"
     LINKER_LANGUAGE C
-)
-
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/pysimple.py
-    DEPENDS "${F2PY_MODULE_NAME}"
-    COMMENT "copying file"
-    COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_BINARY_DIR}/pysimple.py
-            ${CMAKE_BINARY_DIR}/pysimple.py
-)
-
-add_custom_target(
-    pysimple ALL
-    DEPENDS ${CMAKE_BINARY_DIR}/pysimple.py
 )

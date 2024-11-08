@@ -6,7 +6,7 @@ implicit none
 
 type, extends(field_t) :: field_impl1_t
     contains
-    procedure :: compute_afield
+    procedure :: compute_afield => compute_afield
 end type field_impl1_t
 
 contains
