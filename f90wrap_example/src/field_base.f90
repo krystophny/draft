@@ -8,7 +8,7 @@ type, abstract :: field_t
     procedure(compute_afield), deferred :: compute_afield
 end type field_t
 
-interface
+abstract interface
     subroutine compute_afield(self, x, A)
         import :: field_t, dp
         class (field_t), intent(in) :: self
