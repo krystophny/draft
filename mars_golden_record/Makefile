@@ -3,11 +3,12 @@ MARS_SCRIPTS = $(CODE)/external/MARS/RZplot
 all: run
 
 run: main.m MacConvBoozerCustom.m
-	matlab -nodisplay -r "main; exit"
+	matlab -nodisplay -batch main
 
 
 MacConvBoozerCustom.m: Makefile
-	sed -e "s|SDIR = '/cscratch/liuy/WorkReKink/'||g" \
+	sed -e "s|SDIR = '/cscratch/liuy/WorkReKink/';|% &|g" \
+		-e "s|Mac.Norm   = 2.4229e-3;  % normalization factor|% &|g" \
 		$(MARS_SCRIPTS)/MacConvBoozer.m > MacConvBoozerCustom.m
 
 clean:
