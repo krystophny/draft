@@ -4,14 +4,14 @@ module field_abstract
     implicit none
 
     type, abstract :: scalar_field_t
-        contains
+    contains
         procedure(scalar_field_evaluate), deferred :: evaluate
     end type scalar_field_t
 
     interface
         subroutine scalar_field_evaluate(self, x, u)
             import :: scalar_field_t, dp
-            class (scalar_field_t), intent(inout) :: self
+            class(scalar_field_t), intent(inout) :: self
             real(dp), intent(in) :: x(:, :)
             real(dp), intent(inout) :: u(:)
         end subroutine scalar_field_evaluate
