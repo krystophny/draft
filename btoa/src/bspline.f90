@@ -5,6 +5,7 @@ module bspline_mod
 contains
 
     pure function construct_bspline(order, dxinv, y, periodic) result(coeffs)
+        integer, intent(in) :: order
         real(dp), intent(in) :: dxinv, y(:)
         logical, intent(in) :: periodic
         real(dp), allocatable :: coeffs(:)
