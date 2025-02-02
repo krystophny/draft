@@ -2,22 +2,35 @@ import numpy as np
 from numba import njit
 from pauli.util import legendre_p, assoc_legendre_p
 
+EPS = 1e-13
 mu0 = 4e-7 * np.pi
 
 # Fields are normalized to 1A*mu0/2pi
+
+@njit
+def bfield_wire(X, Y, Z, B):
+    Bcyl = np.zeros(3)
+    R = np.sqrt(X**2 + Y**2)
+    cosphi = X / max(R, EPS)
+    sinphi = Y / max(R, EPS)
+    phi = np.arctan2(Y, X)
+    bfield_wire_cyl(R, phi, Z, Bcyl)
+    B[0] = Bcyl[0] * cosphi - Bcyl[1] * sinphi
+    B[1] = Bcyl[0] * sinphi + Bcyl[1] * cosphi
+    B[2] = Bcyl[2]
 
 
 @njit
 def afield_wire_cyl(R, phi, Z, A):
     A[0] = 0.0
     A[1] = 0.0
-    A[2] = -np.log(R)
+    A[2] = -np.log(max(R, EPS))
 
 
 @njit
 def bfield_wire_cyl(R, phi, Z, B):
     B[0] = 0.0
-    B[1] = phi / R
+    B[1] = 1.0 / max(R, EPS)
     B[2] = 0.0
 
 
