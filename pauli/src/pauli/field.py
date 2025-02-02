@@ -9,7 +9,6 @@ mu0 = 4e-7 * np.pi
 # Fields are normalized to 1A*mu0/2pi
 
 
-@njit
 def bfield_wire(X, Y, Z, B):
     Bcyl = np.zeros(3)
     cyl_to_cart(bfield_wire_cyl, X, Y, Z, B)
@@ -70,6 +69,7 @@ def bfield_circle_cyl2(R, phi, Z, B):
     """
     Calculate the magnetic field of a circular loop in cylindrical coordinates.
     See https://farside.ph.utexas.edu/teaching/jk1/Electromagnetism/node52.html
+    Unstable at r=a
     """
     LMAX = 128
     B[:] = 0.0

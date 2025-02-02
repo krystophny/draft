@@ -17,12 +17,21 @@ def test_plot(tmp_path):
     assert plot_path.exists()
 
 
-# def test_bfield_wire(tmp_path):
-#    plot_field(bfield_wire, tmp_path)
+def test_bfield_wire(tmp_path):
+    plot_field_3d(bfield_wire, tmp_path)
 
 
 def test_bfield_circle(tmp_path):
     plot_field_xz(bfield_circle, tmp_path)
+
+def test_bfield_sum(tmp_path):
+    def bfield(x, y, z, B):
+        B1 = np.zeros(3)
+        B2 = np.zeros(3)
+        bfield_wire(x, y, z, B1)
+        bfield_circle(x, y, z, B2)
+        B[:] = B1 + 10.0*B2
+    plot_field_3d(bfield, tmp_path)
 
 
 def plot_field_xz(fun, tmp_path):
