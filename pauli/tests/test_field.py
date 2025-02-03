@@ -2,6 +2,7 @@ import pytest
 
 import numpy as np
 import numba
+
 numba.config.DISABLE_JIT = True  # For faster testing
 
 import matplotlib.pyplot as plt
@@ -27,13 +28,15 @@ def test_bfield_wire(tmp_path):
 def test_bfield_circle(tmp_path):
     plot_field_xz(bfield_circle, tmp_path)
 
+
 def test_bfield_sum(tmp_path):
     def bfield(x, y, z, B):
         B1 = np.zeros(3)
         B2 = np.zeros(3)
         bfield_wire(x, y, z, B1)
         bfield_circle(x, y, z, B2)
-        B[:] = B1 + 10.0*B2
+        B[:] = B1 + 10.0 * B2
+
     plot_field_3d(bfield, tmp_path)
 
 
@@ -42,7 +45,7 @@ def plot_field_xz(fun, tmp_path):
     nz = 50
 
     x = np.linspace(-1.5, 1.5, nx)
-    z = np.linspace(-.5, .5, nz)
+    z = np.linspace(-0.5, 0.5, nz)
 
     X, Z = np.meshgrid(x, z)
 
