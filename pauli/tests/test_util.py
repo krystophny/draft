@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 import scipy.special as sps
-from pauli.util import legendre_p, assoc_legendre_p
+from pauli.util import legendre_p, assoc_legendre_p, ellipk, ellipe
 
 
 @pytest.mark.parametrize(
@@ -42,6 +42,50 @@ def test_assoc_legendre_p(n, m):
     x0 = 0.53
     our_val = assoc_legendre_p(n, m, x0)
     scipy_val = sps.assoc_legendre_p(n, m, x0)
+    assert np.isclose(our_val, scipy_val, rtol=1e-10)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+    ],
+)
+def test_ellipk(m):
+    our_val = ellipk(m)
+    scipy_val = sps.ellipk(m)
+    assert np.isclose(our_val, scipy_val, rtol=1e-10)
+
+
+@pytest.mark.parametrize(
+    "m",
+    [
+        0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+    ],
+)
+def test_ellipe(m):
+    our_val = ellipe(m)
+    scipy_val = sps.ellipe(m)
     assert np.isclose(our_val, scipy_val, rtol=1e-10)
 
 

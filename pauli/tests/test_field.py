@@ -1,9 +1,12 @@
 import pytest
 
 import numpy as np
+import numba
+numba.config.DISABLE_JIT = True  # For faster testing
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from numba import jit
+
 
 from pauli.field import bfield_wire, bfield_circle
 

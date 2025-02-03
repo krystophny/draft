@@ -1,19 +1,19 @@
 import numpy as np
-from scipy.special import ellipk, ellipe
 from numba import jit, njit
-from pauli.util import legendre_p, assoc_legendre_p
+from pauli.util import legendre_p, assoc_legendre_p, ellipk, ellipe
 
 EPS = 1e-13
 mu0 = 4e-7 * np.pi
 
 # Fields are normalized to 1A*mu0/2pi
 
-
+@njit
 def bfield_wire(X, Y, Z, B):
     Bcyl = np.zeros(3)
     cyl_to_cart(bfield_wire_cyl, X, Y, Z, B)
 
 
+@njit
 def bfield_circle(X, Y, Z, B):
     Bcyl = np.zeros(3)
     cyl_to_cart(bfield_circle_cyl, X, Y, Z, B)
@@ -33,6 +33,7 @@ def bfield_wire_cyl(R, phi, Z, B):
     B[2] = 0.0
 
 
+@njit
 def bfield_circle_cyl(R, phi, Z, B):
     """
     Calculate the magnetic field of a circular loop in cylindrical coordinates.
@@ -94,6 +95,7 @@ def bfield_circle_cyl2(R, phi, Z, B):
     B[:] = -np.pi * B[:]
 
 
+@njit
 def cyl_to_cart(fun, X, Y, Z, B):
     Bcyl = np.zeros(3)
     R = np.sqrt(X**2 + Y**2)
