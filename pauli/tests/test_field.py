@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-from pauli.field import bfield_wire, bfield_circle
+from pauli.field import bfield_simple, bfield_wire, bfield_circle
 
 
 def test_plot(tmp_path):
@@ -19,6 +19,10 @@ def test_plot(tmp_path):
     plt.close()
     print("Plot saved to", plot_path)
     assert plot_path.exists()
+
+
+def test_bfield_simple(tmp_path):
+    plot_field_3d(bfield_simple, tmp_path)
 
 
 def test_bfield_wire(tmp_path):

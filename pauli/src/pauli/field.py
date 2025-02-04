@@ -3,9 +3,35 @@ from numba import jit, njit
 from pauli.util import legendre_p, assoc_legendre_p, ellipk, ellipe
 
 EPS = 1e-13
-mu0 = 4e-7 * np.pi
 
 # Fields are normalized to 1A*mu0/2pi
+
+
+@njit
+def afield_simple(X, Y, Z, A):
+    A[0] = 0.0
+    A[1] = 0.0
+    A[2] = 0.5 * (X**2 + Y**2)
+
+
+@njit
+def bfield_simple(X, Y, Z, B):
+    B[0] = Y
+    B[1] = -X
+    B[2] = 0.0
+
+
+@njit
+def bmod_simple(X, Y, Z, Bmod, dBmod):
+    Bmod[:] = np.sqrt(X**2 + Y**2)
+    dBmod[:] = np.array([X, Y, 0.0]) / Bmod
+
+
+@njit
+def afield_wire(X, Y, Z, A):
+    Acyl = np.zeros(3)
+    cyl_to_cart(afield_wire_cyl, X, Y, Z, A)
+
 
 @njit
 def bfield_wire(X, Y, Z, B):

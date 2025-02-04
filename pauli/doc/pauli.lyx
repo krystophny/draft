@@ -407,7 +407,7 @@ For non-singular metric we obtain equations of motion
 \begin_inset Formula 
 \begin{align}
 \dot{x}^{i} & =v^{i}\\
-mg_{kj}\dot{v}^{i} & =-m\Gamma_{ijk}\dot{x}^{j}\dot{x}^{k}+\frac{e}{c}\varepsilon_{ijk}\dot{x}^{j}\sqrt{g}B^{k}-\mu_{0}\difp B{x^{i}}-e\difp{\Phi}{x^{i}}.
+mg_{ij}\dot{v}^{j} & =-m\Gamma_{ijk}v^{j}v^{k}+\frac{e}{c}\varepsilon_{ijk}v^{j}\sqrt{g}B^{k}-\mu_{0}\difp B{x^{i}}-e\difp{\Phi}{x^{i}}.
 \end{align}
 
 \end_inset
@@ -428,15 +428,59 @@ es.
 
 \begin_layout Subsubsection*
 Phase space Lagrangian in canonical coordinates
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align}
 L & =p_{i}\dot{x}^{i}-H(\v x,\v p)\\
-H(\v x,\v v) & =\frac{(p_{i}-\frac{e}{c}A_{i}(\v x))g^{ij}(p_{j}-\frac{e}{c}A_{j}(\v x))}{2m}+\mu_{0}B(\v x)+e\Phi(\v x)
+H(\v x,\v p) & =\frac{(p_{i}-\frac{e}{c}A_{i}(\v x))g^{ij}(\v x)(p_{j}-\frac{e}{c}A_{j}(\v x))}{2m}+\mu_{0}B(\v x)+e\Phi(\v x)
+\end{align}
+
+\end_inset
+
+Canonical equations of motion are
+\begin_inset Formula 
+\begin{align}
+\dot{x}^{k}=\difp H{p_{k}} & =\frac{1}{m}g^{kj}(p_{j}-\frac{e}{c}A_{j})\\
+\dot{p}_{k}=-\difp H{x^{k}} & =-\frac{1}{2m}(p_{i}-\frac{e}{c}A_{i})\difp{g^{ij}}{x^{k}}(p_{j}-\frac{e}{c}A_{j})\nonumber \\
+ & +\frac{e}{mc}(p_{i}-\frac{e}{c}A_{i})g^{ij}\difp{A_{j}}{x^{k}}-\mu_{0}\difp B{x^{k}}-e\difp{\Phi}{x^{k}},
+\end{align}
+
+\end_inset
+
+where we have used symmetry of 
+\begin_inset Formula $g^{ij}$
+\end_inset
+
+ and renamed dummy sumation indices to combine terms.
+ 
+\end_layout
+
+\begin_layout Standard
+Just to simplify notation and further derivations, let us introduce
+\begin_inset Formula 
+\begin{align}
+v_{j}(\v x,\v p) & \equiv\frac{1}{m}(p_{j}-\frac{e}{c}A_{j}(\v x)),\\
+v^{k}(\v x,\v p) & \equiv\frac{1}{m}g^{kj}(\v x)v_{j}(\v x,\v p).
+\end{align}
+
+\end_inset
+
+Then we can write
+\begin_inset Formula 
+\begin{align}
+\dot{x}^{k} & =v^{k},\\
+\dot{p}_{k} & =-\frac{m}{2}v_{i}\difp{g^{ij}}{x^{k}}v_{j}+\frac{e}{c}v^{j}\difp{A_{j}}{x^{k}}-\mu_{0}\difp B{x^{k}}-e\difp{\Phi}{x^{k}}.
 \end{align}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection*
+Initial conditions for the guiding-center CPP
 \end_layout
 
 \begin_layout Standard
@@ -482,6 +526,178 @@ Note that
 
  is treated as a constant during motion accordingly.
  
+\end_layout
+
+\begin_layout Subsubsection*
+Metric and equations of motion in Cartesian coordinates
+\end_layout
+
+\begin_layout Standard
+For Cartesian coordinates 
+\begin_inset Formula $(x,y,z)$
+\end_inset
+
+ we have 
+\begin_inset Formula $\sqrt{g}=1$
+\end_inset
+
+, 
+\begin_inset Formula $g_{ij}=\delta_{ij}$
+\end_inset
+
+, 
+\begin_inset Formula $g^{ij}=\delta^{ij}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Gamma_{ijk}=0$
+\end_inset
+
+.
+ Equations of motion are
+\begin_inset Formula 
+\begin{align}
+\dot{x} & =v^{x},\quad\dot{y}=v^{y},\quad\dot{z}=v^{z},\\
+\dot{v}^{x} & =\frac{e}{mc}\left(v^{y}B^{z}-v^{z}B^{y}\right)-\frac{\mu_{0}}{m}\difp Bx-\frac{e}{m}\difp{\Phi}x,\\
+\dot{v}^{y} & =\frac{e}{mc}\left(v^{z}B^{x}-v^{x}B^{z}\right)-\frac{\mu_{0}}{m}\difp By-\frac{e}{m}\difp{\Phi}y,\\
+\dot{v}^{z} & =\frac{e}{mc}\left(v^{x}B^{y}-v^{y}B^{x}\right)-\frac{\mu_{0}}{m}\difp Bz-\frac{e}{m}\difp{\Phi}z.
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Metric and equations of motion in cylindrical coordinates
+\end_layout
+
+\begin_layout Standard
+For cylindrical coordinates 
+\begin_inset Formula $(R,\varphi,Z)$
+\end_inset
+
+ we have 
+\begin_inset Formula $\sqrt{g}=R$
+\end_inset
+
+ and
+\begin_inset Formula 
+\begin{equation}
+g_{ij}=\left(\begin{array}{ccc}
+1\\
+ & R^{2}\\
+ &  & 1
+\end{array}\right),
+\end{equation}
+
+\end_inset
+
+only
+\begin_inset Formula 
+\begin{equation}
+\difp{}Rg_{\varphi\varphi}=2R
+\end{equation}
+
+\end_inset
+
+is nonzero.
+ Reciprocal metric:
+\begin_inset Formula 
+\begin{equation}
+g^{ij}=\left(\begin{array}{ccc}
+1\\
+ & 1/R^{2}\\
+ &  & 1
+\end{array}\right),
+\end{equation}
+
+\end_inset
+
+only
+\begin_inset Formula 
+\begin{equation}
+\difp{}Rg^{\varphi\varphi}=-\frac{2}{R^{3}}
+\end{equation}
+
+\end_inset
+
+is nonzero.
+ Christopher symbols with index lowered:
+\begin_inset Formula 
+\begin{equation}
+\Gamma_{R\varphi\varphi}=-R,\quad\Gamma_{\varphi R\varphi}=\Gamma_{\varphi\varphi R}=R.
+\end{equation}
+
+\end_inset
+
+Other components are zero.
+ For Lagrangian equations this means
+\begin_inset Formula 
+\begin{align}
+\dot{R} & =v^{R},\quad\dot{\varphi}=v^{\varphi},\quad\dot{Z}=v^{Z},\\
+\dot{v}^{R} & =Rv^{\varphi\,2}+\frac{e}{mc}R\left(v^{\varphi}B^{Z}-v^{Z}B^{\varphi}\right)-\frac{\mu_{0}}{m}\difp BR-\frac{e}{m}\difp{\Phi}R.\\
+\dot{v}^{\varphi} & =-\frac{2}{R}v^{R}v^{\varphi}+\frac{e}{mcR}(v^{Z}B^{R}-v^{R}B^{Z})-\frac{\mu_{0}}{mR}\difp B{\varphi}-\frac{e}{mR}\difp{\Phi}{\varphi}.\\
+\dot{v}^{Z} & =\frac{e}{mc}R\left(v^{R}B^{\varphi}-v^{\varphi}B^{R}\right)-\frac{\mu_{0}}{m}\difp BZ-\frac{e}{m}\difp{\Phi}Z.
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Computing the metric tensor for given magnetic data
+\end_layout
+
+\begin_layout Standard
+Assume that we have independently given 
+\begin_inset Formula $B=\sqrt{B_{i}B^{i}}$
+\end_inset
+
+, 
+\begin_inset Formula $h_{i}=B_{i}/B$
+\end_inset
+
+ and 
+\begin_inset Formula $A_{i}$
+\end_inset
+
+.
+ Then
+\begin_inset Formula 
+\begin{equation}
+B=h_{i}B^{i}=h_{i}\frac{\varepsilon^{ijk}}{\sqrt{g}}\difp{A_{k}}{x^{j}}.
+\end{equation}
+
+\end_inset
+
+This means we can immediately compute the metric determinant
+\begin_inset Formula 
+\begin{equation}
+\sqrt{g}=B^{-1}h_{i}\varepsilon^{ijk}\difp{A_{k}}{x^{j}}.
+\end{equation}
+
+\end_inset
+
+For components of the metric tensor we have
+\begin_inset Formula 
+\begin{align}
+h_{i} & =g_{ij}B^{j}B^{-1}.
+\end{align}
+
+\end_inset
+
+Together with 
+\begin_inset Formula $\det\,g_{ij}=\sqrt{g}$
+\end_inset
+
+ we have four equation for the four independent component of the symmetric
+ metric tensor 
+\begin_inset Formula $g_{ij}$
+\end_inset
+
+.
 \end_layout
 
 \end_body
