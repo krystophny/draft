@@ -495,7 +495,7 @@ To obtain a CPP describing guiding-center motion we set
  to absorb the initial gyration via
 \begin_inset Formula 
 \begin{equation}
-\mu_{0}=\frac{mv_{\perp0}}{2B(\v x_{0})},\quad v_{\parallel0}=\v v_{0}\cdot\v b(\v x_{0}),\quad\v b(\v x)=\frac{\v B(\v x)}{B(\v x)},\quad v_{\perp0}=\sqrt{v_{0}^{2}-v_{\parallel0}}.
+\mu_{0}=\frac{mv_{\perp0}}{2B(\v x_{0})},\quad v_{\parallel0}=\v v_{0}\cdot\v b(\v x_{0}),\quad\v b(\v x)=\frac{\v B(\v x)}{B(\v x)},\quad v_{\perp0}=\sqrt{v_{0}^{2}-v_{\parallel0}^{2}}.
 \end{equation}
 
 \end_inset
