@@ -1,11 +1,10 @@
 CODE = getenv('CODE');
-DATA = getenv('DATA');
 addpath([CODE '/external/MARS/RZplot']);
 
 global Mac
 global SDIR
 
-SDIR = [DATA '/DEMO/MARS/MARSQ_OUTPUTS_100kAt_dBkinetic_NTVkinetic_NEO2profs_KEYTORQ_1/'];
+SDIR = ['RUN/MARS'];
 
 Mac.mm_plot = [];
 Mac.edge = 1.0;
