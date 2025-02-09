@@ -8,6 +8,7 @@ run_mars: RUN.IN PROFDEN.IN OUTRMAR OUTVMAR
 
 RUN.IN PROFDEN.IN:
 	cp $(MARS_TEMPLATE)/*.IN .
+	sed -i "s|NPROFT = 3|NPROFT = 2|g" RUN.IN
 
 OUTRMAR OUTVMAR: run_chease
 
