@@ -20,3 +20,8 @@ NOUT
 chease_namelist
 mappa_schi_RZ_chease_python.data
 EXPEQ_EXPEQ.IN
+EQU01
+EQU02
+EQU03
+NDES
+NSAVE

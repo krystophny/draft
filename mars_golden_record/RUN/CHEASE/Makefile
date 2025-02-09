@@ -22,6 +22,7 @@ clean:
 	      EXPEQ_EQDSK.IN RZmetric_chease_python.data data_input_metrica_chease \
 	      shafranov_shift.data ETAVAC EXPTNZ.OUT chease.bin fort.14 \
           EXPEQ chease.dat mappa_s_chi_chease EXPEQ.OUT NOUT chease_namelist \
-	      mappa_schi_RZ_chease_python.data EXPEQ_EXPEQ.IN
+	      mappa_schi_RZ_chease_python.data EXPEQ_EXPEQ.IN \
+		  EQU01 EQU02 EQU03 NDES NSAVE
 
 .PHONY: all run clean
