@@ -1,6 +1,5 @@
 
 CHEASE_TEMPLATE = $(DATA)/DEMO/EQDSK/Equilibrium_DEMO2019_CHEASE/MOD_Qprof_Test
-CREATE_EQUILIBRIUM = $(DATA)/DEMO/EQDSK/Equil_2021_PMI_QH_mode_betap_1d04_li_1d02_Ip_18d27MA_SOF_std.eqdsk
 CHEASE_EQUILIBRIUM = $(DATA)/DEMO/EQDSK/Equilibrium_DEMO2019_CHEASE/MOD_Qprof_Test/EXPEQ.OUT
 
 all: run
@@ -24,3 +23,5 @@ clean:
 	      shafranov_shift.data ETAVAC EXPTNZ.OUT chease.bin fort.14 \
           EXPEQ chease.dat mappa_s_chi_chease EXPEQ.OUT NOUT chease_namelist \
 	      mappa_schi_RZ_chease_python.data EXPEQ_EXPEQ.IN
+
+.PHONY: all run clean
