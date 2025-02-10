@@ -4,7 +4,7 @@ CHEASE_TEMPLATE = $(CODE)/external/MARS/EXAMPLE/Equi
 all: run_mars
 
 run_mars: RUN.IN PROFDEN.IN OUTRMAR OUTVMAR
-	. /etc/profile.d/modules.sh && module load mars && mpirun marsq.x
+	. /etc/profile.d/modules.sh && module load mars && mpirun marsq.x || true
 
 RUN.IN PROFDEN.IN:
 	cp $(MARS_TEMPLATE)/*.IN .
@@ -26,7 +26,7 @@ EXPEQ:
 
 clean:
 	@echo "Removing all files and directories except 'Makefile'..."
-	@find . -mindepth 1 -maxdepth 1 ! -name 'Makefile' -exec rm -rf {} +
+	@find . -mindepth 1 -maxdepth 1 ! -name 'Makefile' ! -name '.gitignore' -exec rm -rf {} +
 	@echo "Done."
 
 .PHONY: all run_chease run_mars inputs clean
