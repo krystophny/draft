@@ -4,7 +4,7 @@ addpath([CODE '/external/MARS/RZplot']);
 global Mac
 global SDIR
 
-SDIR = ['RUN/MARS'];
+SDIR = ['RUN/MARS/'];
 
 Mac.mm_plot = [];
 Mac.edge = 1.0;
