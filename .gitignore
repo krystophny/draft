@@ -61,5 +61,5 @@ spec/2DOF_targetIotaAndVolume_000_000000.sp.end
 f90wrap_example/build/CMakeFiles/cmake.check_cache
 **/tests/output
 pauli/doc/#pauli.lyx#
-**/bin
-**/obj
+**/bin/*
+**/obj/*
