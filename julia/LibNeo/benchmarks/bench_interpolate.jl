@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 using BenchmarkTools
-using LibNeo
+using LibNeo.Interpolate
 using Printf
 
 # Constants matching the Fortran tests
