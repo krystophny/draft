@@ -1,5 +1,5 @@
 using Test
-using LibNeo
+using LibNeo.Interpolate
 
 @testset "LibNeo Tests" begin
     @test 1 + 1 == 2

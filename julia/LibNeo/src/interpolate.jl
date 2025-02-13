@@ -1,3 +1,7 @@
+module Interpolate
+
+export SplineData1D, construct_splines_1d, destroy_splines_1d, evaluate_splines_1d
+
 include("splines.jl")
 
 struct SplineData1D
@@ -45,3 +49,5 @@ function evaluate_splines_1d(spl::SplineData1D, x::Float64)
     end
     return y
 end
+
+end  # module Interpolate
