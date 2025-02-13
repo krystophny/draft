@@ -1,5 +1,5 @@
-FC = gfortran-14
-FFLAGS = -O3 -march=native
+FC ?= gfortran-14
+FFLAGS ?= -O3 -march=native
 
 all: dispatch_switch.x
 
