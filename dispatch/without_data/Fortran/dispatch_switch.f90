@@ -20,9 +20,9 @@ program main
     val%type = type
     select case (type)
     case (TYPE_INT)
-        val%dat%int_value = 42
+        val%dat%double_value = 42.0d0
     case (TYPE_FLOAT)
-        val%dat%float_value = 3.14
+        val%dat%double_value = 3.14d0
     case (TYPE_DOUBLE)
         val%dat%double_value = 2.718281828459045d0
     end select
@@ -42,9 +42,9 @@ program main
     ! Print the result and the time taken
     select case (type)
     case (TYPE_INT)
-        print *, "Processed int: ", val%dat%int_value
+        print *, "Processed int: ", val%dat%double_value
     case (TYPE_FLOAT)
-        print *, "Processed float: ", val%dat%float_value
+        print *, "Processed float: ", val%dat%double_value
     case (TYPE_DOUBLE)
         print *, "Processed double: ", val%dat%double_value
     end select

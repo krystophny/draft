@@ -8,8 +8,6 @@ module dispatch_switch_module
 
     ! Define a type to hold different types of data
     type :: Data
-        integer :: int_value
-        real :: float_value
         real(8) :: double_value
     end type Data
 
@@ -23,15 +21,15 @@ contains
 
     ! Function to perform arithmetic on an int
     function process_int(val) result(result_value)
-        integer, intent(in) :: val
-        integer :: result_value
-        result_value = val + 10
+        real(8), intent(in) :: val
+        real(8) :: result_value
+        result_value = val + 10.0
     end function process_int
 
     ! Function to perform arithmetic on a float
     function process_float(val) result(result_value)
-        real, intent(in) :: val
-        real :: result_value
+        real(8), intent(in) :: val
+        real(8) :: result_value
         result_value = val * 2.0
     end function process_float
 
@@ -47,9 +45,9 @@ contains
         type(Value), intent(inout) :: val
         select case (val%type)
         case (TYPE_INT)
-            val%dat%int_value = process_int(val%dat%int_value)
+            val%dat%double_value = process_int(val%dat%double_value)
         case (TYPE_FLOAT)
-            val%dat%float_value = process_float(val%dat%float_value)
+            val%dat%double_value = process_float(val%dat%double_value)
         case (TYPE_DOUBLE)
             val%dat%double_value = process_double(val%dat%double_value)
         case default
