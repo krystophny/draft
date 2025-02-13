@@ -145,7 +145,7 @@ contains
         case ("double")
             allocate(DoubleValue :: val)
         case default
-            error stop "Unsupported type: " // type
+            error stop "Unsupported type"
         end select
     end function create_val
 

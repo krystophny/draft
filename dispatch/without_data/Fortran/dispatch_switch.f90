@@ -4,7 +4,6 @@ program main
     implicit none
     type(Value) :: val
     integer :: type
-    integer :: i
     integer, parameter :: iterations = 1000000000
     real :: start_time, end_time, elapsed_time
 
