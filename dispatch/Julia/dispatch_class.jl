@@ -1,4 +1,3 @@
-using Printf
 using Dates
 
 # Abstract base type for values
@@ -10,16 +9,12 @@ mutable struct IntValue <: Value
     IntValue(initial::Int = 42) = new(initial)
 end
 
-function process(v::IntValue)
-    v.value += 10  # Example: add 10 to int
+function process!(v::IntValue)
+    v.value += 10
 end
 
 function print_value(v::IntValue)
-    @printf("Processed int: %d\n", v.value)
-end
-
-function clone(v::IntValue)
-    return IntValue(v.value)
+    println("Processed int: ", v.value)
 end
 
 # Concrete implementation for Float values
@@ -28,16 +23,12 @@ mutable struct FloatValue <: Value
     FloatValue(initial::Float32 = 3.14f0) = new(initial)
 end
 
-function process(v::FloatValue)
-    v.value *= 2.0f0  # Example: multiply float by 2
+function process!(v::FloatValue)
+    v.value *= 2.0f0
 end
 
 function print_value(v::FloatValue)
-    @printf("Processed float: %.2f\n", v.value)
-end
-
-function clone(v::FloatValue)
-    return FloatValue(v.value)
+    println("Processed float: ", v.value)
 end
 
 # Concrete implementation for Double values
@@ -46,20 +37,16 @@ mutable struct DoubleValue <: Value
     DoubleValue(initial::Float64 = 2.718281828459045) = new(initial)
 end
 
-function process(v::DoubleValue)
-    v.value /= 2.0  # Example: divide double by 2
+function process!(v::DoubleValue)
+    v.value /= 2.0
 end
 
 function print_value(v::DoubleValue)
-    @printf("Processed double: %.15f\n", v.value)
+    println("Processed double: ", v.value)
 end
 
-function clone(v::DoubleValue)
-    return DoubleValue(v.value)
-end
-
-# Factory function to create appropriate value objects
-function create_value(type::String)
+# Factory function to create value objects
+function create_value(type::String)::Value
     if type == "int"
         return IntValue()
     elseif type == "float"
@@ -67,19 +54,15 @@ function create_value(type::String)
     elseif type == "double"
         return DoubleValue()
     else
-        throw(ArgumentError("Unsupported type: $type"))
+        error("Unsupported type: " * type)
     end
 end
 
-# Configuration reader function
-function read_type(filename::String)
-    try
-        open(filename, "r") do file
-            type = readline(file)
-            return type
-        end
-    catch e
-        throw(ArgumentError("Failed to open or read config file: $filename"))
+# Read type from configuration file
+function read_type(filename::String)::String
+    open(filename, "r") do file
+        line = readline(file)
+        return strip(line)
     end
 end
 
@@ -93,27 +76,24 @@ function main()
         value = create_value(type)
 
         # Start timing
-        iterations = 1000000000
+        iterations = 1_000_000_000
         start_time = now()
 
         # Process the value multiple times
         for _ in 1:iterations
-            process(value)
+            process!(value)
         end
 
         # Stop timing
-        end_time = now()
-        elapsed = end_time - start_time
+        elapsed_time = now() - start_time
 
         # Print results
         print_value(value)
-        @printf("Time taken for %d iterations: %.6f seconds\n", iterations, elapsed.value / 1000)
-
+        println("Time taken for ", iterations, " iterations: ", elapsed_time)
     catch e
-        println("Error: ", e.msg)
+        println("Error: ", e)
         return 1
     end
-
     return 0
 end
 

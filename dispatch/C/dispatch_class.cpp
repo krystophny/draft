@@ -11,7 +11,6 @@ public:
     virtual ~Value() = default;
     virtual void process() = 0;
     virtual void print() const = 0;
-    virtual std::unique_ptr<Value> clone() const = 0;
 };
 
 // Concrete implementation for int values
@@ -28,10 +27,6 @@ public:
 
     void print() const override {
         std::cout << "Processed int: " << value << std::endl;
-    }
-
-    std::unique_ptr<Value> clone() const override {
-        return std::make_unique<IntValue>(value);
     }
 };
 
@@ -50,10 +45,6 @@ public:
     void print() const override {
         std::cout << "Processed float: " << value << std::endl;
     }
-
-    std::unique_ptr<Value> clone() const override {
-        return std::make_unique<FloatValue>(value);
-    }
 };
 
 // Concrete implementation for double values
@@ -70,10 +61,6 @@ public:
 
     void print() const override {
         std::cout << "Processed double: " << value << std::endl;
-    }
-
-    std::unique_ptr<Value> clone() const override {
-        return std::make_unique<DoubleValue>(value);
     }
 };
 
