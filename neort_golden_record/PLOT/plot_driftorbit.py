@@ -5,6 +5,7 @@ import scipy.interpolate as spi
 import matplotlib.pyplot as plt
 import os
 import re
+import sys
 #from exportfig import exportfig
 from noexportfig import exportfig
 
@@ -25,8 +26,10 @@ D12D11i = {}
 smin = 0.0
 smax = 1.0
 
+neodata = np.loadtxt(sys.argv[1], comments="%")
+
 #neodata = np.loadtxt('ntv_out_asdex30835_rmp_n2_HatFun14.dat')
-neodata = np.loadtxt('ntv_out_nonlocal.dat')
+#neodata = np.loadtxt('ntv_out_nonlocal.dat')
 
 neos = neodata[:,0]
 neoorder = np.argsort(neos)
@@ -40,6 +43,9 @@ neodata = neodata[condi2,:]
 D11neo = neodata[:,7]
 D12neo = neodata[:,8]
 D12D11neo = D12neo/D11neo
+
+datadirs = sys.argv[2:]
+datadirs = {i:datadirs[i] for i in range(len(datadirs))}
 
 #datadirs[0] = '/temp/ert/CONDOR/driftorbit/n1_supban_0.6'
 #datadirs[0] = '/proj/plasma/RMP/DOC/Diss_Albert/code/driftorbit/ASDEX/30835_rmp/n1_driftorbit'
@@ -61,7 +67,7 @@ D12D11neo = D12neo/D11neo
 #datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-03-xx_shear'
 #datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-03-11_n1_shear'
 #datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-08-24_n1_shear_newmagfie'
-datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_CIRC/160328_supban_s_shear'
+#datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_CIRC/160328_supban_s_shear'
 #datadirs[1] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-03-18_shear_0.6'
 #datadirs[2] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-03-18_shear_0.8'
 
@@ -71,8 +77,8 @@ datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_CIRC/160328_supban_s_shear'
 #datadirs[1] = '/temp/ert/CONDOR/driftorbit/n1_magdrift_0.6'
 #datadirs[1] = '/temp/ert/CONDOR/driftorbit/n1.2'
 #profname = os.path.join(datadir,'Mtprofile.in')
-profname1 = os.path.join('/proj/plasma/RMP/DOC/Diss_Albert/code/driftorbit/Mtprofile_Hamiltonian.dat')
-profname2 = os.path.join('/proj/plasma/RMP/DOC/Diss_Albert/code/driftorbit/ASDEX/profiles/Mtprofile190.dat')
+profname1 = os.path.join('Mtprofile_Hamiltonian.dat')
+profname2 = os.path.join('Mtprofile190.dat')
 profdata1 = np.loadtxt(profname1)
 profdata2 = np.loadtxt(profname2)
 
@@ -158,12 +164,12 @@ Mt1  = profdata1[:,1]
 sMt2  = profdata2[:,0]
 Mt2  = profdata2[:,1]
 
-sa = np.concatenate(s.values())
-D11 = np.concatenate(D11do.values())
-D12 = np.concatenate(D12do.values())
-D12D11 = np.concatenate(D12D11do.values())
-D11sb = np.concatenate(D11sb.values())
-D12sb = np.concatenate(D12sb.values())
+sa = np.concatenate(list(s.values()))
+D11 = np.concatenate(list(D11do.values()))
+D12 = np.concatenate(list(D12do.values()))
+D12D11 = np.concatenate(list(D12D11do.values()))
+D11sb = np.concatenate(list(D11sb.values()))
+D12sb = np.concatenate(list(D12sb.values()))
 order = np.argsort(sa)
 sa = sa[order]
 D11 = D11[order]
@@ -184,7 +190,7 @@ D12sb = D12sb[condi]
 
 #plt.figure(1)
 #plt.plot(s[1], avnabs_old, 'x-')
-#plt.hold(1)
+#
 #plt.plot(neos, avnabs[condi2])
 #plt.plot(s[1], avnabs_interp(s[1]))
 #plt.grid(1)
@@ -200,7 +206,6 @@ D12sb = D12sb[condi]
 plt.figure(2)
 plt.title('D11 ASDEX-U #30835 (RMP) n=2')
 #plt.semilogy(s, data[:,1], '.')
-plt.hold(1)
 #plt.semilogy(s, data[:,2], 'd')
 #plt.semilogy(np.sqrt(s[0]), D11do[0], '-x')
 plt.semilogy(sa, D11, '-x')
@@ -228,7 +233,7 @@ exportfig('asdex_rmp_D11')
 plt.figure(4)
 plt.title('D12 ASDEX-U #30835 (RMP) n=2')
 #plt.semilogy(s, data[:,1], '.')
-plt.hold(1)
+
 #plt.semilogy(s, data[:,2], 'd')
 #plt.semilogy(np.sqrt(s[0]), D12do[0], '-o')
 plt.semilogy(sa, D12, '-x')
@@ -253,7 +258,7 @@ exportfig('asdex_rmp_D12')
 plt.figure(3)
 plt.title('ASDEX-U #30835 D12/D11 (RMP) n=2')
 #plt.semilogy(s, data[:,1], '.')
-plt.hold(1)
+
 #plt.semilogy(s, data[:,2], 'd')
 plt.plot(sa, D12D11, '-x')
 #plt.plot(np.sqrt(s[0]), (D12do[0]+D12i[1](s[0]))/(D11do[0]+D11i[1](s[0])), '--x')
@@ -275,7 +280,7 @@ exportfig('asdex_rmp_D12D11')
 
 ## plt.subplot(2,2,4)
 ## plt.plot(s, data[:,4]/data[:,1], '.')
-## plt.hold(1)
+##
 ## plt.plot(s, data[:,5]/data[:,2], 'x')
 ## plt.plot(s, data[:,6]/data[:,3], 'o')
 #plt.show()
@@ -284,3 +289,4 @@ np.savetxt('tot_rmp_n3_noshear.txt', np.transpose([sa,D11,D12]))
 np.savetxt('sb_rmp_n3_noshear.txt', np.transpose([sa,D11sb,D12sb]))
 np.savetxt('do_rmp_n3_noshear.txt', np.transpose([sa,D11-D11sb,D12-D12sb]))
 
+plt.show()
