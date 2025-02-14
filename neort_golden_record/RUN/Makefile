@@ -10,6 +10,7 @@ $(RUNS):
 	for file in $(FILES); do cp $(REFDATA)/$@/$$file $@; done
 	ln -s ../$(REFCODE)/build/driftorbit_test $@/driftorbit_test
 	ln -s ../run_driftorbit.py $@/run_driftorbit.py
+	ln -s ../Makefile.template $@/Makefile
 
 clean:
 	rm -rf $(RUNS)
