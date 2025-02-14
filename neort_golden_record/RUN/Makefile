@@ -14,10 +14,10 @@ $(RUNS):
 	ln -s ../run_driftorbit.py $@/run_driftorbit.py
 	ln -s ../Makefile.template $@/Makefile
 
-run: $(RUNS)
+run:
 	for run in $(RUNS); do \
 		cd $$run; \
-		make; \
+		make -j8; \
 		cd ..; \
 	done
 

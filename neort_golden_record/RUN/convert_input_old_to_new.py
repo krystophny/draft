@@ -77,6 +77,7 @@ def add_missing_fields(config: dict) -> dict:
 
 def correct_changed_fields(config: dict) -> dict:
     config["epsmn"] = "1.0d0"
+    return config
 
 
 def print_new_input(config: dict):
