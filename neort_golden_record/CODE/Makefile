@@ -2,7 +2,7 @@ all: NEO-RT NEO-RT.old
 
 NEO-RT:
 	if [ ! -d NEO-RT ]; then \
-		git clone https://github.com/itpplasma/NEO-RT CODE/NEO-RT; \
+		git clone https://github.com/itpplasma/NEO-RT NEO-RT; \
 	fi
 	make -C NEO-RT
 
