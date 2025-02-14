@@ -8,7 +8,6 @@ Published 3 June 2016
 NEO-RT runs relevant for the main figures are
     - 2016-01-27_n1_magdrift
     - 2016-01-28_n1_nomag
-    - 2016-02-22_n1_nomag
     - 2016-03-11_n1_noshear
     - 2016-03-11_n1_shear
 
