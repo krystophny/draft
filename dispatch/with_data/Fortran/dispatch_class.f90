@@ -4,17 +4,17 @@ program main
     type(ValueFactory) :: factory
     type(Config) :: conf
     class(value), allocatable :: val
-    character(len=20) :: type
+    character(len=20) :: dtype
     integer :: i
     integer, parameter :: iterations = 1000000000
     real :: start_time, end_time
 
     try: block
         ! Read configuration
-        type = conf%readType("config.txt")
+        dtype = conf%readType("config.txt")
 
         ! Create value object based on configuration
-        val = factory%createValue(type)
+        val = factory%createValue(dtype)
 
         ! Start timing
         call cpu_time(start_time)

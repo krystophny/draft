@@ -134,10 +134,10 @@ contains
     end function clone_double
 
     ! Factory procedure
-    function create_val(type) result(val)
-        character(len=*), intent(in) :: type
+    function create_val(dtype) result(val)
+        character(len=*), intent(in) :: dtype
         class(Value), allocatable :: val
-        select case (type)
+        select case (dtype)
         case ("int")
             allocate(IntValue :: val)
         case ("float")
@@ -150,15 +150,15 @@ contains
     end function create_val
 
     ! Configuration reader procedure
-    function read_type(filename) result(type)
+    function read_type(filename) result(dtype)
         character(len=*), intent(in) :: filename
-        character(len=20) :: type
+        character(len=20) :: dtype
         integer :: iostat
         open(unit=10, file=filename, status='old', action='read', iostat=iostat)
         if (iostat /= 0) then
             error stop "Failed to open config file: " // filename
         end if
-        read(10, *, iostat=iostat) type
+        read(10, *, iostat=iostat) dtype
         if (iostat /= 0) then
             error stop "Failed to read type from config file"
         end if
