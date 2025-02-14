@@ -16,6 +16,7 @@ $(TAGS): deps
 		echo "Directory $@ already exists. Skipping clone."; \
 	fi
 	cd $@ && \
+	cp ../CMakeLists.patched.txt CMakeLists.txt && \
 	touch neo.in && \
 	touch tok-synch2-n0.bc && \
 	ln -s ../BOOZER_MAGFIE . && \
@@ -23,8 +24,8 @@ $(TAGS): deps
 	ln -s ../contrib . && \
 	mkdir -p build && \
 	cd build && \
-	cmake -GNinja .. && \
-	ninja
+	cmake .. && \
+	make
 
 
 deps:
