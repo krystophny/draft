@@ -11,6 +11,7 @@ def main():
     config = read_old_input(lines)
     config = remove_unused_fields(config)
     config = add_missing_fields(config)
+    config = correct_changed_fields(config)
     print_new_input(config)
 
 
@@ -72,6 +73,10 @@ def add_missing_fields(config: dict) -> dict:
     config["comptorque"] = "F"
     config["intoutput"] = "F"
     return config
+
+
+def correct_changed_fields(config: dict) -> dict:
+    config["epsmn"] = "1.0d0"
 
 
 def print_new_input(config: dict):

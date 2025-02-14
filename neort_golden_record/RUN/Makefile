@@ -14,7 +14,14 @@ $(RUNS):
 	ln -s ../run_driftorbit.py $@/run_driftorbit.py
 	ln -s ../Makefile.template $@/Makefile
 
+run: $(RUNS)
+	for run in $(RUNS); do \
+		cd $$run; \
+		make; \
+		cd ..; \
+	done
+
 clean:
 	rm -rf $(RUNS)
 
-.PHONY: all clean $(RUNS)
+.PHONY: all clean run $(RUNS)
