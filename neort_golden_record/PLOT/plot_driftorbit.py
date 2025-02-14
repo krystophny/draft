@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import re
 import sys
+import f90nml
 #from exportfig import exportfig
 from noexportfig import exportfig
 
@@ -95,10 +96,14 @@ for k in datadirs.keys():
         infiles = [f.replace('out','in') for f in files]
         s[k] = []
         for f in infiles:
-            fp = open(os.path.join(datadirs[k], f))
-            lines = fp.readlines()
-            s[k].append(float(lines[3].split()[0]))
-            fp.close()
+            try:
+                nml = f90nml.read(os.path.join(datadirs[k], f))
+                s[k].append(nml['params']['s'])
+            except:
+                fp = open(os.path.join(datadirs[k], f))
+                lines = fp.readlines()
+                s[k].append(float(lines[3].split()[0]))
+                fp.close()
         s[k] = np.array(s[k])
     else:
         files = files2
@@ -218,7 +223,7 @@ plt.ylim([1e-3*max(D11neo),1.1*max(D11neo)])
 plt.grid(True, which="both")
 plt.xlabel('s')
 plt.ylabel('D11/Dp')
-plt.legend(['Hamiltonian', 'Neo2', 'Superbanana'], 'best')
+plt.legend(['Hamiltonian', 'Neo2', 'Superbanana'])
 #plt.ylim([1e-4,0.05])
 #plt.ylim([0,0.002])
 ax2 = plt.gca().twinx()
@@ -243,7 +248,7 @@ plt.semilogy(sa, D12sb, '-')
 plt.grid(True, which="both")
 plt.xlabel('s')
 plt.ylabel('D12/Dp')
-plt.legend(['Hamiltonian', 'Neo2', 'Superbanana'], 'best')
+plt.legend(['Hamiltonian', 'Neo2', 'Superbanana'])
 #plt.ylim([3e-4,0.1])
 plt.ylim([1e-3*max(D12neo),1.1*max(D12neo)])
 ax2 = plt.gca().twinx()
@@ -268,7 +273,7 @@ plt.plot(neos, D12D11neo, '-')
 plt.grid(True)
 plt.xlabel('s')
 plt.ylabel('D12/D11')
-plt.legend(['Hamiltonian', 'Neo2'], 'best')
+plt.legend(['Hamiltonian', 'Neo2'])
 ax2 = plt.gca().twinx()
 ax2.plot(sMt1, Mt1, 'b')
 ax2.plot(sMt2, Mt2, 'r--')
