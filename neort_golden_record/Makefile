@@ -1,14 +1,15 @@
-all: CODE/NEO-RT/build/neo_rt.x
+all: CODE DATA
 
-CODE/NEO-RT/build/neo_rt.x: CODE/NEO-RT
-	cd CODE/NEO-RT && make
+CODE:
+	make -C CODE
 
-CODE/NEO-RT:
-	if [ ! -d CODE/NEO-RT ]; then \
-		git clone https://github.com/itpplasma/NEO-RT CODE/NEO-RT; \
-	fi
+DATA:
+	make -C DATA
 
 clean:
-	make -C CODE/NEO-RT clean
+	make -C CODE clean
 
-.PHONY: all clean
+distclean: clean
+	make -C DATA clean
+
+.PHONY: all clean distclean CODE DATA
