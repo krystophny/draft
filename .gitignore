@@ -63,3 +63,5 @@ f90wrap_example/build/CMakeFiles/cmake.check_cache
 pauli/doc/#pauli.lyx#
 **/bin/*
 **/obj/*
+neort_golden_record/RUN/*/*.out
+neort_golden_record/RUN/*/driftorbit*.in
