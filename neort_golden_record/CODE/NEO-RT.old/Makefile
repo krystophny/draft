@@ -16,7 +16,7 @@ $(TAGS): deps
 		echo "Directory $@ already exists. Skipping clone."; \
 	fi
 	cd $@ && \
-	cp ../CMakeLists.patched.txt CMakeLists.txt && \
+	cp ../CMakeLists.$@.txt CMakeLists.txt && \
 	touch neo.in && \
 	touch tok-synch2-n0.bc && \
 	ln -s ../BOOZER_MAGFIE . && \
