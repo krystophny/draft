@@ -54,7 +54,10 @@ def read_old_input(lines: list) -> dict:
         "inp_swi"
     ]
     for field in fields:
-        config[field] = next(lines).strip().split()[0]
+        try:
+            config[field] = next(lines).strip().split()[0]
+        except:
+            print(f"Field {field} not found in input file")
     return config
 
 
@@ -67,10 +70,14 @@ def remove_unused_fields(config: dict) -> dict:
 
 def add_missing_fields(config: dict) -> dict:
     config["runmode"] = "\"transport\""
-    config["nonlin"] = "F"
-    config["efac"] = "1.0d0"
-    config["bfac"] = "1.0d0"
-    config["inp_swi"] = 9
+    if not "nonlin" in config:
+        config["nonlin"] = "F"
+    if not "efac" in config:
+        config["efac"] = "1.0d0"
+    if not "bfac" in config:
+        config["bfac"] = "1.0d0"
+    if not "inp_swi" in config:
+        config["inp_swi"] = 9
     config["orbit_mode_avg"] = 0
     config["orbit_mode_transp"] = 0
     config["vsteps"] = 256
