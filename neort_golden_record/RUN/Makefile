@@ -8,6 +8,9 @@ all: $(RUNS)
 $(RUNS):
 	mkdir -p $@
 	for file in $(FILES); do cp $(REFDATA)/$@/$$file $@; done
+	cp $(REFDATA)/$@/thetafun_inp.dat $@/thetafun_inp.dat | true
+	cp $(REFDATA)/$@/plasma.in $@/plasma.in | true
+	ln -s Mtprofile.in $@/profile.in
 	python convert_input_old_to_new.py \
 		$(REFDATA)/$@/driftorbit.in.template > $@/driftorbit.in.template
 	ln -s ../$(NEWCODE)/build/neo_rt.x $@/driftorbit_test

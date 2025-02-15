@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import re
 import sys
+import f90nml
 #from exportfig import exportfig
 from noexportfig import exportfig
 
@@ -61,21 +62,26 @@ profdata2 = np.loadtxt(profname2)
 
 for k in datadirs.keys():
     datadir = datadirs[k]
-    pattern1 = re.compile(r'driftorbit([0-9]+)\.out')
-    pattern2 = re.compile(r'driftorbit_*([0-9]+\.[0-9]+)\.out')
+    pattern1 = re.compile(r'driftorbit([0-9]+)\.out$')
+    pattern2 = re.compile(r'driftorbit_*([0-9]+\.[0-9]+)\.out$')
     files = os.listdir(datadir)
     files1 = [f for f in files if pattern1.match(f)] # new format (> 01/2016)
     files2 = [f for f in files if pattern2.match(f)] # old format
+    breakpoint()
 
     if len(files1) > 0:
         files = files1
         infiles = [f.replace('out','in') for f in files]
         s[k] = []
         for f in infiles:
-            fp = open(os.path.join(datadirs[k], f))
-            lines = fp.readlines()
-            s[k].append(float(lines[3].split()[0]))
-            fp.close()
+            try:
+                nml = f90nml.read(os.path.join(datadirs[k], f))
+                s[k].append(nml['params']['s'])
+            except:
+                fp = open(os.path.join(datadirs[k], f))
+                lines = fp.readlines()
+                s[k].append(float(lines[3].split()[0]))
+                fp.close()
         s[k] = np.array(s[k])
     else:
         files = files2
@@ -84,18 +90,21 @@ for k in datadirs.keys():
     sbdata[k] = []
     data[k] = []
     for f in files:
-        #print(f)
+        print(f)
         data[k].append(np.loadtxt(os.path.join(datadir,f)))
         sbdata[k].append(np.loadtxt(os.path.join(datadir,f.replace('.out','_integral.out'))))
 
     data[k] = np.array(data[k])
-    sbdata[k] = np.concatenate(sbdata[k])
-    sbdata[k] = sbdata[k][np.abs(sbdata[k][:,1])<0.5]
+    if len(sbdata[k]) > 0:
+        sbdata[k] = np.concatenate(sbdata[k])
+        sbdata[k] = sbdata[k][np.abs(sbdata[k][:,1])<0.5]
 
     order = np.argsort(s[k])
     s[k] = s[k][order]
+    breakpoint()
     data[k] = data[k][order,:]
-    sbdata[k] = sbdata[k][order,:]
+    if len(sbdata[k]) > 0:
+        sbdata[k] = sbdata[k][order,:]
 
     # correction of avnabs = dsdreff = <|nabla s|>
     a = 49.41
