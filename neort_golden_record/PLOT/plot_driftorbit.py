@@ -85,8 +85,8 @@ profdata2 = np.loadtxt(profname2)
 
 for k in datadirs.keys():
     datadir = datadirs[k]
-    pattern1 = re.compile(r'driftorbit([0-9]+)\.out')
-    pattern2 = re.compile(r'driftorbit_*([0-9]+\.[0-9]+)\.out')
+    pattern1 = re.compile(r'driftorbit([0-9]+)\.out$')
+    pattern2 = re.compile(r'driftorbit_*([0-9]+\.[0-9]+)\.out$')
     files = os.listdir(datadir)
     files1 = [f for f in files if pattern1.match(f)] # new format (> 01/2016)
     files2 = [f for f in files if pattern2.match(f)] # old format
