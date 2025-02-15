@@ -1,11 +1,11 @@
 NEWCODE ?= ../CODE/NEO-RT
 REFDATA ?= ../DATA
-RUNS = 2016-01-27_n1_magdrift 2016-01-28_n1_nomag 2016-03-11_n1_noshear 2016-03-11_n1_shear 170118_n1_ql 170118_n1_nonlin 170118_n1_noshear_ql 170118_n1_noshear_nonlin
+OLDRUNS = 2016-01-27_n1_magdrift 2016-01-28_n1_nomag 2016-03-11_n1_noshear 2016-03-11_n1_shear 170118_n1_ql 170118_n1_nonlin 170118_n1_noshear_ql 170118_n1_noshear_nonlin
 FILES = neo.in neo_pert.in in_file in_file_pert Mtprofile.in
 
-all: $(RUNS)
+all: $(OLDRUNS)
 
-$(RUNS):
+$(OLDRUNS):
 	mkdir -p $@
 	for file in $(FILES); do cp $(REFDATA)/$@/$$file $@; done
 	cp $(REFDATA)/$@/thetafun_inp.dat $@/thetafun_inp.dat | true
@@ -18,13 +18,13 @@ $(RUNS):
 	ln -s ../Makefile.template $@/Makefile
 
 run:
-	for run in $(RUNS); do \
+	for run in $(OLDRUNS); do \
 		cd $$run; \
 		make -j8; \
 		cd ..; \
 	done
 
 clean:
-	rm -rf $(RUNS)
+	rm -rf $(OLDRUNS)
 
-.PHONY: all clean run $(RUNS)
+.PHONY: all clean run $(OLDRUNS)
