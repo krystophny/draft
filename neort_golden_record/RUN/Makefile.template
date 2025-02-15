@@ -5,6 +5,6 @@ OUTPUTS := $(addsuffix .out, $(NAMES))
 all: $(OUTPUTS)
 
 $(OUTPUTS):
-	python run_driftorbit.py $(subst driftorbit,,$(basename $@))
+	python run_driftorbit.py $(subst driftorbit,,$(basename $@)) > $@.log
 
 .PHONY: all $(OUTPUTS)
