@@ -6,6 +6,7 @@ import scipy.integrate as spint
 import matplotlib.pyplot as plt
 import os
 import re
+import sys
 #from exportfig import exportfig
 from noexportfig import exportfig
 
@@ -24,9 +25,13 @@ D11i = {}
 D12i = {}
 D12D11i = {}
 
-neodata = np.loadtxt('ntv_out_asdex30835_rmp_n2_HatFun14.dat')
-datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/170118_n1_noshear_ql'
-datadirs[1] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/170118_n1_noshear_nonlin'
+neodata = np.loadtxt(sys.argv[1], comments="%")
+datadirs = sys.argv[2:]
+datadirs = {i:datadirs[i] for i in range(len(datadirs))}
+
+#neodata = np.loadtxt('ntv_out_asdex30835_rmp_n2_HatFun14.dat')
+#datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/170118_n1_noshear_ql'
+#datadirs[1] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/170118_n1_noshear_nonlin'
 
 #neodata = np.loadtxt('ntv_out_nonlocal.dat')
 #datadirs[0] = '/temp/ert/CONDOR/driftorbit/RUNS_ASDEX/2016-08-24_n1_shear_newmagfie'
@@ -49,8 +54,8 @@ D12neo = neodata[:,8]
 D12D11neo = D12neo/D11neo
 
 
-profname1 = os.path.join('/proj/plasma/RMP/DOC/Diss_Albert.orig/code/driftorbit/Mtprofile_Hamiltonian.dat')
-profname2 = os.path.join('/proj/plasma/RMP/DOC/Diss_Albert.orig/code/driftorbit/ASDEX/profiles/Mtprofile190.dat')
+profname1 = os.path.join('Mtprofile_Hamiltonian.dat')
+profname2 = os.path.join('Mtprofile190.dat')
 profdata1 = np.loadtxt(profname1)
 profdata2 = np.loadtxt(profname2)
 
@@ -114,7 +119,7 @@ for k in datadirs.keys():
     D11i[k] = spi.interpolate.interp1d(s[k], D11do[k], bounds_error=False)
     D12i[k] = spi.interpolate.interp1d(s[k], D12do[k], bounds_error=False)
     D12D11i[k] = spi.interpolate.interp1d(s[k], D12D11do[k], bounds_error=False)
-    
+
 sMt1  = profdata1[:,0]
 Mt1  = profdata1[:,1]
 sMt2  = profdata2[:,0]
@@ -169,7 +174,7 @@ Tphineo=-(sqrtgBth(neos)/c)*qe*(-ne(neos)*(D11neo*Dp(neos)*A1(neos)+D12neo*Dp(ne
 
 plt.figure(2)
 plt.semilogy(np.sqrt(neos), np.abs(Tphineo)/10.0, '-', linewidth=2, mew=1, ms=5)
-plt.semilogy(np.sqrt(s[0]), np.abs(Tphi0)/10.0, '-.', linewidth=2, mew=1, ms=5) 
+plt.semilogy(np.sqrt(s[0]), np.abs(Tphi0)/10.0, '-.', linewidth=2, mew=1, ms=5)
 plt.semilogy(np.sqrt(s[1]), np.abs(Tphi1)/10.0, '--', linewidth=2, mew=1, ms=5)
 plt.ylim([1e-3,1e0])
 plt.grid(True, which="both")
@@ -201,7 +206,7 @@ si = np.linspace(smin,smax,200)
 
 #plt.figure(3)
 #plt.semilogy(neos, np.abs(Tphineo)/10.0, '-', linewidth=2, mew=1, ms=5)
-#plt.semilogy(s[0], np.abs(Tphi0)/10.0, 'o--', linewidth=2, mew=1, ms=5) 
+#plt.semilogy(s[0], np.abs(Tphi0)/10.0, 'o--', linewidth=2, mew=1, ms=5)
 #plt.semilogy(s[1], np.abs(Tphi1)/10.0, 'd--', linewidth=2, mew=1, ms=5)
 #plt.ylim([1e-3,1e0])
 #plt.grid(True, which="both")
@@ -227,6 +232,7 @@ Tneo = spint.quad(Tphineoi, smin, smax)
 T0 = spint.quad(Tphi0i, smin, smax)
 T1 = spint.quad(Tphi1i, smin, smax)
 
-print(Tneo)
-print(T0)
-print(T1)
+print(f"NEO-2 quasilinear Tphi  = {Tneo}")
+print(f"NEO-RT quasilinear Tphi = {T0}")
+print(f"NEO-RT nonlinear Tphi   = {T1}")
+plt.show()

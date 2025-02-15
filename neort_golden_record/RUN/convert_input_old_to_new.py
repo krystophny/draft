@@ -48,6 +48,10 @@ def read_old_input(lines: list) -> dict:
         "noshear",
         "pertfile",
         "odeint",
+        "nonlin",
+        "bfac",
+        "efac",
+        "inp_swi"
     ]
     for field in fields:
         config[field] = next(lines).strip().split()[0]
