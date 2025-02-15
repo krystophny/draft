@@ -2,7 +2,7 @@
 ORIGIN ?= https://github.com/itpplasma/NEO-RT
 
 # List of tags to clone
-TAGS = v2016.01.27 v2016.03.31
+TAGS = v2016.01.27 v2016.03.31 v2016.12.27
 
 # Default target
 all: $(TAGS)
