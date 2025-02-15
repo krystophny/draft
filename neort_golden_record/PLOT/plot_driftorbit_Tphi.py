@@ -67,7 +67,6 @@ for k in datadirs.keys():
     files = os.listdir(datadir)
     files1 = [f for f in files if pattern1.match(f)] # new format (> 01/2016)
     files2 = [f for f in files if pattern2.match(f)] # old format
-    breakpoint()
 
     if len(files1) > 0:
         files = files1
@@ -101,7 +100,6 @@ for k in datadirs.keys():
 
     order = np.argsort(s[k])
     s[k] = s[k][order]
-    breakpoint()
     data[k] = data[k][order,:]
     if len(sbdata[k]) > 0:
         sbdata[k] = sbdata[k][order,:]
