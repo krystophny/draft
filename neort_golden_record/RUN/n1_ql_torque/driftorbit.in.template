@@ -25,6 +25,5 @@
     orbit_mode_avg = 0
     orbit_mode_transp = 0
     vsteps = 256
-    comptorque = .false.
     intoutput = .false.
 /

@@ -81,7 +81,6 @@ def add_missing_fields(config: dict) -> dict:
     config["orbit_mode_avg"] = 0
     config["orbit_mode_transp"] = 0
     config["vsteps"] = 256
-    config["comptorque"] = "F"
     config["intoutput"] = "F"
     return config
 
