@@ -175,7 +175,6 @@ Tphi0=-(sqrtgBth(s[0])/c)*qe*(-ne(s[0])*(D11do[0]*Dp(s[0])*A1(s[0])+D12do[0]*Dp(
 Tphi1=-(sqrtgBth(s[1])/c)*qe*(-ne(s[1])*(D11do[1]*Dp(s[1])*A1(s[1])+D12do[1]*Dp(s[1])*A2(s[1])))
 Tphineo=-(sqrtgBth(neos)/c)*qe*(-ne(neos)*(D11neo*Dp(neos)*A1(neos)+D12neo*Dp(neos)*A2(neos)))
 
-
 #%%
 
 
