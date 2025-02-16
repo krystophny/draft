@@ -1,5 +1,5 @@
 program compare_flux_surface_area
-    use common, only: pi, disp
+    use util, only: pi, disp
     use do_magfie_mod, only: do_magfie_init, do_magfie, s, iota
 
     implicit none
