@@ -65,3 +65,4 @@ pauli/doc/#pauli.lyx#
 **/obj/*
 neort_golden_record/RUN/*/*.out
 neort_golden_record/RUN/*/driftorbit*.in
+*.smod
