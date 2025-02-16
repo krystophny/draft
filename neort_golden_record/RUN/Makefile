@@ -1,6 +1,6 @@
 NEWCODE ?= ../CODE/NEO-RT
 REFDATA ?= ../DATA
-OLDRUNS = 2016-01-27_n1_magdrift 2016-01-28_n1_nomag 2016-03-11_n1_noshear 2016-03-11_n1_shear 170118_n1_ql 170118_n1_nonlin 170118_n1_noshear_ql 170118_n1_noshear_nonlin
+OLDRUNS = 2016-01-27_n1_magdrift 2016-01-28_n1_nomag 2016-03-11_n1_noshear 2016-03-11_n1_shear 170118_n1_ql 170118_n1_nonlin 170118_n1_noshear_ql 170118_n1_noshear_nonlin 170613_n1_ql_torque
 FILES = neo.in neo_pert.in in_file in_file_pert Mtprofile.in
 
 all: $(OLDRUNS)

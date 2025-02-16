@@ -18,3 +18,14 @@ To double-check that higher harmonics do not affect the results, we also ran
     - 2016-02-22_n3_nomag
     - 2016-03-31_rmp_90_n3_noshear
     - 2016-03-31_rmp_90_n3_shear
+
+Newer runs on transport
+    - 170118_n1_ql
+    - 170118_n1_noshear_ql
+
+Nonlinear runs
+    - 170118_n1_nonlin
+    - 170118_n1_noshear_nonlin
+
+Direct torque comptutation
+    - 170613_n1_ql_torque

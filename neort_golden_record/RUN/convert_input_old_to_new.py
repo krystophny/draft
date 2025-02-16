@@ -51,7 +51,11 @@ def read_old_input(lines: list) -> dict:
         "nonlin",
         "bfac",
         "efac",
-        "inp_swi"
+        "inp_swi",
+        "orbit_mode_avg",
+        "orbit_mode_transp",
+        "vsteps",
+        "intoutput"
     ]
     for field in fields:
         try:
@@ -78,10 +82,14 @@ def add_missing_fields(config: dict) -> dict:
         config["bfac"] = "1.0d0"
     if not "inp_swi" in config:
         config["inp_swi"] = 9
-    config["orbit_mode_avg"] = 0
-    config["orbit_mode_transp"] = 0
-    config["vsteps"] = 256
-    config["intoutput"] = "F"
+    if not "orbit_mode_avg" in config:
+        config["orbit_mode_avg"] = 0
+    if not "orbit_mode_transp" in config:
+        config["orbit_mode_transp"] = 0
+    if not "vsteps" in config:
+        config["vsteps"] = 256
+    if not "intoutput" in config:
+        config["intoutput"] = "F"
     return config
 
 
