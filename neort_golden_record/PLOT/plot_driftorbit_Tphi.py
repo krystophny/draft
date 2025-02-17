@@ -8,8 +8,6 @@ import os
 import re
 import sys
 import f90nml
-#from exportfig import exportfig
-from noexportfig import exportfig
 
 plt.close('all')
 
@@ -239,9 +237,10 @@ T0 = spint.quad(Tphi0i, smin, smax)
 T1 = spint.quad(Tphi1i, smin, smax)
 
 print()
-print("Crude estimate of integral torque. Can be wrong by factor ~2!")
+print("Crude estimate of integral torque. Can be wrong by factor ~5!")
 print(f"NEO-2 quasilinear  : {Tneo}")
 print(f"NEO-RT quasilinear : {T0}")
 print(f"NEO-RT nonlinear   : {T1}")
 print()
 plt.show()
+plt.savefig("torque_density_from_transport.png")
