@@ -79,7 +79,7 @@ def remove_unused_fields(config: dict) -> dict:
 
 
 def add_missing_fields(config: dict) -> dict:
-    config["runmode"] = '"transport"'
+    config["comptorque"] = "F"
     if not "nonlin" in config:
         config["nonlin"] = "F"
     if not "efac" in config:
