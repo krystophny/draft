@@ -52,10 +52,7 @@ def read_old_input(lines: list) -> dict:
         "bfac",
         "efac",
         "inp_swi",
-        "orbit_mode_avg",
-        "orbit_mode_transp",
-        "vsteps",
-        "intoutput"
+        "vsteps"
     ]
     for field in fields:
         try:
