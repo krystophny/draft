@@ -2,9 +2,12 @@ RUNS := $(shell seq 0 99)
 NAMES := $(addprefix driftorbit, $(RUNS))
 OUTPUTS := $(addsuffix .out, $(NAMES))
 
+.PHONY: all clean $(OUTPUTS)
+
 all: $(OUTPUTS)
 
 $(OUTPUTS):
 	python run_driftorbit.py $(subst driftorbit,,$(basename $@)) > $@.log 2>&1
 
-.PHONY: all $(OUTPUTS)
+clean:
+	rm -f *.out $(addsuffix .log, $(OUTPUTS)) $(addsuffix .in, $(NAMES))
