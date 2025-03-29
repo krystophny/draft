@@ -66,3 +66,5 @@ pauli/doc/#pauli.lyx#
 neort_golden_record/RUN/*/*.out
 neort_golden_record/RUN/*/driftorbit*.in
 *.smod
+*.png
+callgrind.out.*

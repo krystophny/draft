@@ -57,12 +57,7 @@ def Dp(data, extra, stor):
 
 
 def Er(data, extra, Mt, stor):
-    return (
-        Mt
-        * vTi(data, extra, stor)
-        * data.sqrtgBth(stor)
-        / (data.R0 * c)
-    )
+    return Mt * vTi(data, extra, stor) * data.sqrtgBth(stor) / (data.R0 * c)
 
 
 def A1(data, extra, Mt, stor):
@@ -81,25 +76,21 @@ def A2(data, extra, stor):
 data = Neo2Data("ntv_out_nonlocal.dat")
 extra = Neo2ExtraProfiles("kappa_profile_asdex30835_axi.dat")
 stor = 0.39919420999999999
-Mt = 5.4868750000000001E-002
+Mt = 5.4868750000000001e-002
 
-np.testing.assert_almost_equal(
-    extra.dlogneds(stor), -1.0151482746599974, decimal=3
+np.testing.assert_allclose(extra.dlogneds(stor), -1.0151482746599974, rtol=1e-3)
+
+np.testing.assert_allclose(-1.5 * extra.dlogTids(stor), 1.5445109225307794, rtol=1e-3)
+
+np.testing.assert_allclose(
+    A2(data, extra, stor) / data.avnabpsi(stor), -1.0296739483538528, rtol=1e-3
 )
 
-np.testing.assert_almost_equal(
-    - 1.5 * extra.dlogTids(stor), 1.5445109225307794, decimal=3
+np.testing.assert_allclose(
+    A1(data, extra, Mt, stor) / data.avnabpsi(stor), -0.94744307657575477, rtol=5e-3
 )
 
-np.testing.assert_almost_equal(
-    A2(data, extra, stor) / neo2_data.avnabpsi(stor),
-    -1.0296739483538528,
-    decimal=3
-)
+np.testing.assert_allclose(data.sqrtgBth(stor), 425810.31264413858, rtol=1e-3)
 
-np.testing.assert_almost_equal(
-    A1(data, extra, Mt, stor) / neo2_data.avnabpsi(stor),
-    -0.94744307657575477,
-    decimal=2
-)
+print("avnabpsi = ", data.avnabpsi(stor))
 # %%

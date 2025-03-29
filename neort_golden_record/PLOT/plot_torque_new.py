@@ -89,10 +89,12 @@ plt.ylabel(r'Torque density / N/m^2')
 plt.ylim([1e-3, 1e0])
 plt.grid(True, which="both")
 plt.legend(['NEO-RT'])
+plt.savefig("torque_density.png")
 
 plt.figure(2)
 plt.plot(s[0], np.cumsum(dTphi_int_ds[0]*ds[0]))
 
 plt.show()
+plt.savefig("integral_torque.png")
 
 print('Integral torque   : {} Nm'.format(np.sum(dTphi_int_ds[0]*ds[0])))

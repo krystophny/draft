@@ -1,6 +1,12 @@
 MARS_TEMPLATE = $(CODE)/external/MARS/EXAMPLE/Kink
 CHEASE_TEMPLATE = $(CODE)/external/MARS/EXAMPLE/Equi
 
+ifeq ($(shell uname),Darwin)
+	SED = gsed
+else
+	SED = sed
+endif
+
 all: run_mars
 
 run_mars: RUN.IN PROFDEN.IN OUTRMAR OUTVMAR
@@ -8,7 +14,7 @@ run_mars: RUN.IN PROFDEN.IN OUTRMAR OUTVMAR
 
 RUN.IN PROFDEN.IN:
 	cp $(MARS_TEMPLATE)/*.IN .
-	sed -i "s|NPROFT = 3|NPROFT = 2|g" RUN.IN
+	$(SED) -i "s|NPROFT = 3|NPROFT = 2|g" RUN.IN
 
 OUTRMAR OUTVMAR: run_chease
 
@@ -16,7 +22,7 @@ run_chease: datain EXPEQ
 	. /etc/profile.d/modules.sh && module load mars && chease.x < datain
 
 datain:
-	sed -e "s|NEGP = -1|NEGP = 0|g" \
+	$(SED) -e "s|NEGP = -1|NEGP = 0|g" \
 		-e "s|NER = 1|NER = 2|g" \
 		-e "s|NEGP=-1,NER= 1|NEGP= 0,NER= 2|g" \
 		$(CHEASE_TEMPLATE)/datain > datain

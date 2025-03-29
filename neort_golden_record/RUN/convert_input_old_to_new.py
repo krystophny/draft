@@ -52,10 +52,7 @@ def read_old_input(lines: list) -> dict:
         "bfac",
         "efac",
         "inp_swi",
-        "orbit_mode_avg",
-        "orbit_mode_transp",
         "vsteps",
-        "intoutput"
     ]
     for field in fields:
         try:
@@ -66,14 +63,23 @@ def read_old_input(lines: list) -> dict:
 
 
 def remove_unused_fields(config: dict) -> dict:
-    unused_fields = ["n0", "mthnum", "Mtmin", "Mtmax", "Mtnum", "calcflux"]
+    unused_fields = [
+        "n0",
+        "mth",
+        "mthnum",
+        "Mtmin",
+        "Mtmax",
+        "Mtnum",
+        "calcflux",
+        "supban",
+    ]
     for field in unused_fields:
         del config[field]
     return config
 
 
 def add_missing_fields(config: dict) -> dict:
-    config["runmode"] = "\"transport\""
+    config["comptorque"] = "F"
     if not "nonlin" in config:
         config["nonlin"] = "F"
     if not "efac" in config:
@@ -82,14 +88,8 @@ def add_missing_fields(config: dict) -> dict:
         config["bfac"] = "1.0d0"
     if not "inp_swi" in config:
         config["inp_swi"] = 9
-    if not "orbit_mode_avg" in config:
-        config["orbit_mode_avg"] = 0
-    if not "orbit_mode_transp" in config:
-        config["orbit_mode_transp"] = 0
     if not "vsteps" in config:
         config["vsteps"] = 256
-    if not "intoutput" in config:
-        config["intoutput"] = "F"
     return config
 
 
@@ -99,17 +99,15 @@ def correct_changed_fields(config: dict) -> dict:
 
 
 def print_new_input(config: dict):
-    print(
-        "! Input file for NEO-RT - Version 1.3\n"
-        "!\n"
-        "!\n"
-        "&params"
-    )
+    print("! Input file for NEO-RT - Version 1.3\n" "!\n" "!\n" "&params")
     for key, value in config.items():
-        if value == "T": value = ".true."
-        if value == "F": value = ".false."
+        if value == "T":
+            value = ".true."
+        if value == "F":
+            value = ".false."
         print(f"    {key} = {value}")
     print("/")
+
 
 if __name__ == "__main__":
     main()
