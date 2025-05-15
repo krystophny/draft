@@ -10,7 +10,6 @@
     epsmn = 1.0d0
     m0 = 0
     mph = 2
-    supban = .false.
     magdrift = .true.
     nopassing = .false.
     noshear = .false.

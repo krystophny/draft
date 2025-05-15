@@ -88,8 +88,8 @@ for k in datadirs.keys():
     data[k] = []
     for f in files:
         print(f)
-        data[k].append(np.loadtxt(os.path.join(datadir,f)))
-        sbdata[k].append(np.loadtxt(os.path.join(datadir,f.replace('.out','_integral.out'))))
+        data[k].append(np.loadtxt(os.path.join(datadir,f), comments="#"))
+        sbdata[k].append(np.loadtxt(os.path.join(datadir,f.replace('.out','_integral.out')), comments="#"))
 
     data[k] = np.array(data[k])
     if len(sbdata[k]) > 0:
