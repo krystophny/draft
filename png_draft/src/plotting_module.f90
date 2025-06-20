@@ -156,7 +156,7 @@ contains
             if (i == 0) cycle
             pos = real(i) * 0.25
             if (abs(pos) <= 1.0) then
-                write(label_text, '(F4.2)') pos
+                write(label_text, '(F5.2)') pos
                 call ctx%text(pos, -label_offset, trim(adjustl(label_text)))
                 if (abs(pos) > 0.01) then
                     call ctx%text(-label_offset, pos, trim(adjustl(label_text)))
