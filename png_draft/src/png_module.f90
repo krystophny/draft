@@ -131,26 +131,47 @@ contains
         integer(1), intent(inout) :: image_data(*)
         integer, intent(in) :: w, h
         real, intent(in) :: pi
-        real, allocatable :: x_values(:), y_values(:)
-        integer :: i
-        real :: x_norm, y_norm
         
-        ! Generate sine wave data points
-        allocate(x_values(w), y_values(w))
-        
-        do i = 1, w
-            x_norm = real(i - 1) / real(w - 1)  ! Normalize x to [0,1]
-            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5  ! Sine wave, normalized to [0,1]
-            
-            x_values(i) = x_norm
-            y_values(i) = y_norm
-        end do
-        
-        ! Plot the line using generic function
-        call plot_line(image_data, w, h, x_values, y_values, w, 0_1, 0_1, -1_1)
-        
-        deallocate(x_values, y_values)
+        ! Draw sine wave using parametric approach with real coordinates
+        call draw_parametric_curve(image_data, w, h, 0_1, 0_1, -1_1, pi)
     end subroutine draw_continuous_sine_wave
+
+    subroutine draw_parametric_curve(image_data, img_w, img_h, r, g, b, pi)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h
+        integer(1), intent(in) :: r, g, b
+        real, intent(in) :: pi
+        real :: x_prev, y_prev, x_curr, y_curr
+        real :: t, dt, x_norm, y_norm
+        integer :: i, n_steps
+        
+        ! Use small steps for smooth curve - step size based on pixel resolution
+        n_steps = img_w * 2  ! 2 steps per pixel width for smooth curves
+        dt = 1.0 / real(n_steps - 1)
+        
+        ! Calculate first point
+        t = 0.0
+        x_norm = t
+        y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
+        x_prev = x_norm * real(img_w - 1) + 1.0
+        y_prev = y_norm * real(img_h - 1) + 1.0
+        
+        ! Draw curve by connecting consecutive real-valued points
+        do i = 2, n_steps
+            t = real(i - 1) * dt
+            x_norm = t
+            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
+            
+            x_curr = x_norm * real(img_w - 1) + 1.0
+            y_curr = y_norm * real(img_h - 1) + 1.0
+            
+            ! Draw line segment using real coordinates directly
+            call draw_line_wu(image_data, img_w, img_h, x_prev, y_prev, x_curr, y_curr, r, g, b)
+            
+            x_prev = x_curr
+            y_prev = y_curr
+        end do
+    end subroutine draw_parametric_curve
 
     subroutine plot_line(image_data, img_w, img_h, x_data, y_data, n_points, r, g, b)
         integer(1), intent(inout) :: image_data(*)
