@@ -2,104 +2,113 @@ module plotting_module
     implicit none
     
     private
-    public :: plot_context, create_plot, add_sine_wave, add_axes, finalize_plot
+    public :: plot_context, setup_canvas, draw_sine_wave, draw_coordinate_axes, save_plot
     
-    ! Abstract plotting context
     type, abstract :: plot_context
         integer :: width, height
         real :: x_min, x_max, y_min, y_max
     contains
-        procedure(draw_line_interface), deferred :: draw_line
-        procedure(set_color_interface), deferred :: set_color
-        procedure(finalize_interface), deferred :: finalize
+        procedure(line_interface), deferred :: line
+        procedure(color_interface), deferred :: color
+        procedure(save_interface), deferred :: save
     end type plot_context
     
-    ! Abstract interfaces
     abstract interface
-        subroutine draw_line_interface(this, x1, y1, x2, y2)
+        subroutine line_interface(this, x1, y1, x2, y2)
             import :: plot_context
             class(plot_context), intent(inout) :: this
             real, intent(in) :: x1, y1, x2, y2
-        end subroutine draw_line_interface
+        end subroutine line_interface
         
-        subroutine set_color_interface(this, r, g, b)
+        subroutine color_interface(this, r, g, b)
             import :: plot_context
             class(plot_context), intent(inout) :: this
             real, intent(in) :: r, g, b
-        end subroutine set_color_interface
+        end subroutine color_interface
         
-        subroutine finalize_interface(this, filename)
+        subroutine save_interface(this, filename)
             import :: plot_context
             class(plot_context), intent(inout) :: this
             character(len=*), intent(in) :: filename
-        end subroutine finalize_interface
+        end subroutine save_interface
     end interface
     
 contains
 
-    subroutine create_plot(ctx, width, height, x_min, x_max, y_min, y_max)
+    subroutine setup_canvas(ctx, width, height)
         class(plot_context), intent(inout) :: ctx
         integer, intent(in) :: width, height
-        real, intent(in) :: x_min, x_max, y_min, y_max
         
         ctx%width = width
         ctx%height = height
-        ctx%x_min = x_min
-        ctx%x_max = x_max
-        ctx%y_min = y_min
-        ctx%y_max = y_max
-    end subroutine create_plot
+        ctx%x_min = 0.0
+        ctx%x_max = 1.0
+        ctx%y_min = 0.0
+        ctx%y_max = 1.0
+    end subroutine setup_canvas
     
-    subroutine add_sine_wave(ctx, amplitude, frequency, phase, n_cycles)
+    subroutine draw_sine_wave(ctx, amplitude, cycles)
         class(plot_context), intent(inout) :: ctx
-        real, intent(in) :: amplitude, frequency, phase
-        integer, intent(in) :: n_cycles
-        real :: x_prev, y_prev, x_curr, y_curr
-        real :: t, dt, pi
-        integer :: i, n_steps
+        real, intent(in) :: amplitude
+        integer, intent(in) :: cycles
         
-        pi = 4.0 * atan(1.0)
-        
-        ! Use fine steps for smooth curves
-        n_steps = ctx%width * 2
-        dt = real(n_cycles) * 2.0 * pi / real(n_steps - 1)
-        
-        ! Calculate first point
-        t = 0.0
-        x_prev = t / (real(n_cycles) * 2.0 * pi)  ! Normalize to [0,1]
-        y_prev = 0.5 + amplitude * sin(frequency * t + phase)
-        
-        ! Draw curve
-        do i = 2, n_steps
-            t = real(i - 1) * dt
-            x_curr = t / (real(n_cycles) * 2.0 * pi)
-            y_curr = 0.5 + amplitude * sin(frequency * t + phase)
-            
-            call ctx%draw_line(x_prev, y_prev, x_curr, y_curr)
-            
-            x_prev = x_curr
-            y_prev = y_curr
-        end do
-    end subroutine add_sine_wave
+        call ctx%color(0.0, 0.0, 1.0)
+        call render_parametric_curve(ctx, amplitude, cycles)
+    end subroutine draw_sine_wave
     
-    subroutine add_axes(ctx)
+    subroutine draw_coordinate_axes(ctx)
         class(plot_context), intent(inout) :: ctx
         
-        ! Set axis color (gray)
-        call ctx%set_color(0.25, 0.25, 0.25)
-        
-        ! Draw horizontal axis at center
-        call ctx%draw_line(0.0, 0.5, 1.0, 0.5)
-        
-        ! Draw vertical axis at center  
-        call ctx%draw_line(0.5, 0.0, 0.5, 1.0)
-    end subroutine add_axes
+        call ctx%color(0.25, 0.25, 0.25)
+        call ctx%line(0.0, 0.5, 1.0, 0.5)
+        call ctx%line(0.5, 0.0, 0.5, 1.0)
+    end subroutine draw_coordinate_axes
     
-    subroutine finalize_plot(ctx, filename)
+    subroutine save_plot(ctx, filename)
         class(plot_context), intent(inout) :: ctx
         character(len=*), intent(in) :: filename
         
-        call ctx%finalize(filename)
-    end subroutine finalize_plot
+        call ctx%save(filename)
+    end subroutine save_plot
+
+    subroutine render_parametric_curve(ctx, amplitude, cycles)
+        class(plot_context), intent(inout) :: ctx
+        real, intent(in) :: amplitude
+        integer, intent(in) :: cycles
+        real :: x_prev, y_prev, x_curr, y_curr
+        real :: t, dt, pi, omega
+        integer :: i, steps
+        
+        pi = 4.0 * atan(1.0)
+        omega = real(cycles) * 2.0 * pi
+        steps = ctx%width * 2
+        dt = omega / real(steps - 1)
+        
+        call calculate_first_point(0.0, amplitude, omega, x_prev, y_prev)
+        
+        do i = 2, steps
+            t = real(i - 1) * dt
+            call calculate_curve_point(t, amplitude, omega, x_curr, y_curr)
+            call ctx%line(x_prev, y_prev, x_curr, y_curr)
+            x_prev = x_curr
+            y_prev = y_curr
+        end do
+    end subroutine render_parametric_curve
+
+    subroutine calculate_first_point(t, amplitude, omega, x, y)
+        real, intent(in) :: t, amplitude, omega
+        real, intent(out) :: x, y
+        
+        x = t / omega
+        y = 0.5 + amplitude * sin(t)
+    end subroutine calculate_first_point
+
+    subroutine calculate_curve_point(t, amplitude, omega, x, y)
+        real, intent(in) :: t, amplitude, omega
+        real, intent(out) :: x, y
+        
+        x = t / omega
+        y = 0.5 + amplitude * sin(t)
+    end subroutine calculate_curve_point
 
 end module plotting_module

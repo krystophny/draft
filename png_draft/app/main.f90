@@ -4,25 +4,19 @@ program plot_generator
     use pdf_module
     implicit none
     
-    ! Image parameters (4:3 aspect ratio)
-    integer, parameter :: width = 400
-    integer, parameter :: height = 300
+    integer, parameter :: width = 400, height = 300
+    type(png_context) :: png_canvas
+    type(pdf_context) :: pdf_canvas
     
-    type(png_context) :: png_ctx
-    type(pdf_context) :: pdf_ctx
+    png_canvas = create_png_canvas(width, height)
+    pdf_canvas = create_pdf_canvas(width, height)
     
-    ! Generate PNG plot
-    png_ctx = create_png_plot(width, height)
-    call png_ctx%set_color(0.0, 0.0, 1.0)  ! Blue
-    call add_sine_wave(png_ctx, 0.4, 1.0, 0.0, 4)  ! amplitude, frequency, phase, cycles
-    call add_axes(png_ctx)
-    call finalize_plot(png_ctx, 'output.png')
+    call draw_sine_wave(png_canvas, 0.4, 4)
+    call draw_coordinate_axes(png_canvas)
+    call save_plot(png_canvas, 'output.png')
     
-    ! Generate PDF plot
-    pdf_ctx = create_pdf_plot(width, height)
-    call pdf_ctx%set_color(0.0, 0.0, 1.0)  ! Blue
-    call add_sine_wave(pdf_ctx, 0.4, 1.0, 0.0, 4)  ! amplitude, frequency, phase, cycles
-    call add_axes(pdf_ctx)
-    call finalize_plot(pdf_ctx, 'output.pdf')
+    call draw_sine_wave(pdf_canvas, 0.4, 4)
+    call draw_coordinate_axes(pdf_canvas)
+    call save_plot(pdf_canvas, 'output.pdf')
     
 end program plot_generator

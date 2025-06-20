@@ -4,25 +4,25 @@ module png_context_module
     implicit none
     
     private
-    public :: png_context, create_png_plot
+    public :: png_context, create_png_canvas
     
     ! PNG plotting context
     type, extends(plot_context) :: png_context
         integer(1), allocatable :: image_data(:)
         real :: current_r, current_g, current_b
     contains
-        procedure :: draw_line => png_draw_line
-        procedure :: set_color => png_set_color
-        procedure :: finalize => png_finalize
+        procedure :: line => png_draw_line
+        procedure :: color => png_set_color
+        procedure :: save => png_finalize
     end type png_context
     
 contains
 
-    function create_png_plot(width, height) result(ctx)
+    function create_png_canvas(width, height) result(ctx)
         integer, intent(in) :: width, height
         type(png_context) :: ctx
         
-        call create_plot(ctx, width, height, 0.0, 1.0, 0.0, 1.0)
+        call setup_canvas(ctx, width, height)
         
         ! Initialize PNG image data
         allocate(ctx%image_data(height * (1 + width * 3)))
@@ -32,7 +32,7 @@ contains
         ctx%current_r = 0.0
         ctx%current_g = 0.0
         ctx%current_b = 1.0
-    end function create_png_plot
+    end function create_png_canvas
     
     subroutine png_draw_line(this, x1, y1, x2, y2)
         class(png_context), intent(inout) :: this
