@@ -9,7 +9,7 @@ auto-executables = true
 auto-tests = true
 auto-examples = true
 module-naming = false
-link = ["z"]
+link = ["z", "freetype"]
 [install]
 library = false
 test = false

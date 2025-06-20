@@ -1,6 +1,7 @@
 module png_context_module
     use iso_c_binding
     use plotting_module
+    use text_module
     implicit none
     
     private
@@ -13,6 +14,7 @@ module png_context_module
     contains
         procedure :: line => png_draw_line
         procedure :: color => png_set_color
+        procedure :: text => png_draw_text
         procedure :: save => png_finalize
     end type png_context
     
@@ -63,6 +65,22 @@ contains
         this%current_g = g
         this%current_b = b
     end subroutine png_set_color
+    
+    subroutine png_draw_text(this, x, y, text)
+        class(png_context), intent(inout) :: this
+        real, intent(in) :: x, y
+        character(len=*), intent(in) :: text
+        real :: px, py
+        
+        px = (x - this%x_min) / (this%x_max - this%x_min) * real(this%width - 1) + 1.0
+        py = (1.0 - (y - this%y_min) / (this%y_max - this%y_min)) * real(this%height - 1) + 1.0
+        
+        call render_text_to_image(this%image_data, this%width, this%height, &
+                                 int(px), int(py), text, &
+                                 color_to_byte(this%current_r), &
+                                 color_to_byte(this%current_g), &
+                                 color_to_byte(this%current_b))
+    end subroutine png_draw_text
     
     subroutine png_finalize(this, filename)
         class(png_context), intent(inout) :: this
@@ -445,5 +463,6 @@ contains
         
         crc = crc32(0_c_int32_t, c_loc(data), int(len, c_int))
     end function calculate_crc32
+
 
 end module png_context_module

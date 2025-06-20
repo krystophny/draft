@@ -10,6 +10,7 @@ module plotting_module
     contains
         procedure(line_interface), deferred :: line
         procedure(color_interface), deferred :: color
+        procedure(text_interface), deferred :: text
         procedure(save_interface), deferred :: save
     end type plot_context
     
@@ -25,6 +26,13 @@ module plotting_module
             class(plot_context), intent(inout) :: this
             real, intent(in) :: r, g, b
         end subroutine color_interface
+        
+        subroutine text_interface(this, x, y, text)
+            import :: plot_context
+            class(plot_context), intent(inout) :: this
+            real, intent(in) :: x, y
+            character(len=*), intent(in) :: text
+        end subroutine text_interface
         
         subroutine save_interface(this, filename)
             import :: plot_context
@@ -62,6 +70,7 @@ contains
         call ctx%color(0.25, 0.25, 0.25)
         call draw_axes_lines(ctx)
         call draw_axis_ticks(ctx)
+        call draw_axis_labels(ctx)
     end subroutine draw_coordinate_axes
     
     subroutine save_plot(ctx, filename)
@@ -123,7 +132,7 @@ contains
         real :: tick_size, pos
         integer :: i
         
-        tick_size = 0.05
+        tick_size = 0.02
         
         do i = -4, 4
             if (i == 0) cycle
@@ -134,5 +143,26 @@ contains
             end if
         end do
     end subroutine draw_axis_ticks
+
+    subroutine draw_axis_labels(ctx)
+        class(plot_context), intent(inout) :: ctx
+        real :: pos, label_offset
+        integer :: i
+        character(len=10) :: label_text
+        
+        label_offset = 0.08
+        
+        do i = -4, 4
+            if (i == 0) cycle
+            pos = real(i) * 0.25
+            if (abs(pos) <= 1.0) then
+                write(label_text, '(F4.2)') pos
+                call ctx%text(pos, -label_offset, trim(adjustl(label_text)))
+                if (abs(pos) > 0.01) then
+                    call ctx%text(-label_offset, pos, trim(adjustl(label_text)))
+                end if
+            end if
+        end do
+    end subroutine draw_axis_labels
 
 end module plotting_module

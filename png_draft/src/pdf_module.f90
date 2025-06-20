@@ -11,6 +11,7 @@ module pdf_module
     contains
         procedure :: line => draw_pdf_line
         procedure :: color => set_pdf_color
+        procedure :: text => draw_pdf_text
         procedure :: save => write_pdf_file
     end type pdf_context
     
@@ -59,6 +60,25 @@ contains
         write(color_cmd, '(F4.2, 1X, F4.2, 1X, F4.2, 1X, "RG")') r, g, b
         call add_to_stream(this, color_cmd)
     end subroutine set_pdf_color
+    
+    subroutine draw_pdf_text(this, x, y, text)
+        class(pdf_context), intent(inout) :: this
+        real, intent(in) :: x, y
+        character(len=*), intent(in) :: text
+        real :: pdf_x, pdf_y
+        character(len=200) :: text_cmd
+        
+        call normalize_to_pdf_coords(this, x, y, pdf_x, pdf_y)
+        
+        call add_to_stream(this, "BT")
+        write(text_cmd, '("/F1 8 Tf")') 
+        call add_to_stream(this, text_cmd)
+        write(text_cmd, '(F8.2, 1X, F8.2, 1X, "Td")') pdf_x, pdf_y
+        call add_to_stream(this, text_cmd)
+        write(text_cmd, '("(", A, ") Tj")') trim(text)
+        call add_to_stream(this, text_cmd)
+        call add_to_stream(this, "ET")
+    end subroutine draw_pdf_text
     
     subroutine write_pdf_file(this, filename)
         class(pdf_context), intent(inout) :: this
@@ -121,7 +141,7 @@ contains
     subroutine write_pdf_structure(unit, ctx)
         integer, intent(in) :: unit
         type(pdf_context), intent(in) :: ctx
-        integer :: obj_positions(4), xref_pos
+        integer :: obj_positions(5), xref_pos
         
         call write_string_to_unit(unit, "%PDF-1.4")
         call write_all_objects(unit, ctx, obj_positions)
@@ -131,23 +151,24 @@ contains
     subroutine write_all_objects(unit, ctx, positions)
         integer, intent(in) :: unit
         type(pdf_context), intent(in) :: ctx
-        integer, intent(out) :: positions(4)
+        integer, intent(out) :: positions(5)
         
         call write_catalog_object(unit, positions(1))
         call write_pages_object(unit, ctx, positions(2))
         call write_page_object(unit, ctx, positions(3))
         call write_content_object(unit, ctx, positions(4))
+        call write_font_object(unit, positions(5))
     end subroutine write_all_objects
 
     subroutine write_xref_and_trailer(unit, positions, xref_pos)
-        integer, intent(in) :: unit, positions(4)
+        integer, intent(in) :: unit, positions(5)
         integer, intent(out) :: xref_pos
         character(len=200) :: xref_entry
         character(len=100) :: trailer_str
         
         xref_pos = get_position(unit)
         call write_string_to_unit(unit, "xref")
-        call write_string_to_unit(unit, "0 5")
+        call write_string_to_unit(unit, "0 6")
         call write_string_to_unit(unit, "0000000000 65535 f")
         
         write(xref_entry, '(I10.10, " 00000 n")') positions(1)
@@ -158,9 +179,11 @@ contains
         call write_string_to_unit(unit, xref_entry)
         write(xref_entry, '(I10.10, " 00000 n")') positions(4)
         call write_string_to_unit(unit, xref_entry)
+        write(xref_entry, '(I10.10, " 00000 n")') positions(5)
+        call write_string_to_unit(unit, xref_entry)
         
         call write_string_to_unit(unit, "trailer")
-        call write_string_to_unit(unit, "<</Size 5/Root 1 0 R>>")
+        call write_string_to_unit(unit, "<</Size 6/Root 1 0 R>>")
         call write_string_to_unit(unit, "startxref")
         write(trailer_str, '(I0)') xref_pos
         call write_string_to_unit(unit, trailer_str)
@@ -191,12 +214,12 @@ contains
         integer, intent(in) :: unit
         type(pdf_context), intent(in) :: ctx
         integer, intent(out) :: pos
-        character(len=100) :: page_str, size_str
+        character(len=200) :: page_str, size_str
         
         pos = get_position(unit)
         write(size_str, '(I0, 1X, I0)') ctx%width, ctx%height
         call write_string_to_unit(unit, "3 0 obj")
-        write(page_str, '("<</Type /Page/Parent 2 0 R/MediaBox [0 0 ", A, "]/Contents 4 0 R/Resources <<>>>>")') trim(size_str)
+        write(page_str, '("<</Type /Page/Parent 2 0 R/MediaBox [0 0 ", A, "]/Contents 4 0 R/Resources <</Font <</F1 5 0 R>>>>>>>>")') trim(size_str)
         call write_string_to_unit(unit, page_str)
         call write_string_to_unit(unit, "endobj")
     end subroutine write_page_object
@@ -216,6 +239,16 @@ contains
         call write_string_to_unit(unit, "endstream")
         call write_string_to_unit(unit, "endobj")
     end subroutine write_content_object
+
+    subroutine write_font_object(unit, pos)
+        integer, intent(in) :: unit
+        integer, intent(out) :: pos
+        
+        pos = get_position(unit)
+        call write_string_to_unit(unit, "5 0 obj")
+        call write_string_to_unit(unit, "<</Type /Font/Subtype /Type1/BaseFont /Helvetica>>")
+        call write_string_to_unit(unit, "endobj")
+    end subroutine write_font_object
 
     integer function get_position(unit)
         integer, intent(in) :: unit
