@@ -5,121 +5,59 @@ module text_module
     private
     public :: init_text_system, cleanup_text_system, render_text_to_image
     
-    ! FreeType structures
-    type, bind(C) :: ft_bitmap
-        integer(c_int) :: rows
+    ! Glyph information structure (matches C wrapper)
+    type, bind(C) :: glyph_info_t
         integer(c_int) :: width
-        integer(c_int) :: pitch
+        integer(c_int) :: height
+        integer(c_int) :: left
+        integer(c_int) :: top
+        integer(c_int) :: advance_x
         type(c_ptr) :: buffer
-        integer(c_short) :: num_grays
-        integer(c_char) :: pixel_mode
-        integer(c_char) :: palette_mode
-        type(c_ptr) :: palette
-    end type ft_bitmap
-    
-    ! Correct FreeType glyph slot structure layout
-    type, bind(C) :: ft_glyph_slot_rec
-        type(c_ptr) :: library
-        type(c_ptr) :: face
-        type(c_ptr) :: next
-        integer(c_int) :: reserved
-        type(c_ptr) :: generic_data
-        type(c_ptr) :: generic_finalizer
-        ! FT_Glyph_Metrics
-        integer(c_long) :: width
-        integer(c_long) :: height
-        integer(c_long) :: hori_bearing_x
-        integer(c_long) :: hori_bearing_y
-        integer(c_long) :: hori_advance
-        integer(c_long) :: vert_bearing_x
-        integer(c_long) :: vert_bearing_y
-        integer(c_long) :: vert_advance
-        ! Continue with actual fields
-        integer(c_long) :: advance_x
-        integer(c_long) :: advance_y
-        integer(c_int) :: format
-        type(ft_bitmap) :: bitmap
-        integer(c_int) :: bitmap_left
-        integer(c_int) :: bitmap_top
-        type(c_ptr) :: outline
-        integer(c_int) :: num_subglyphs
-        type(c_ptr) :: subglyphs
-        type(c_ptr) :: control_data
-        integer(c_long) :: control_len
-        integer(c_long) :: lsb_delta
-        integer(c_long) :: rsb_delta
-        type(c_ptr) :: other
-        type(c_ptr) :: internal
-    end type ft_glyph_slot_rec
-    
-    ! Minimal FreeType face structure to access glyph slot
-    type, bind(C) :: ft_face_minimal
-        type(c_ptr) :: memory        ! offset 0
-        type(c_ptr) :: stream        ! offset 8
-        type(c_ptr) :: sizes_list    ! offset 16
-        type(c_ptr) :: glyph         ! offset 24 - this is what we want!
-        ! ... other fields omitted
-    end type ft_face_minimal
+        integer(c_int) :: buffer_size
+    end type glyph_info_t
 
-    ! FreeType C interfaces
+    ! FreeType wrapper C interfaces
     interface
-        function ft_init_freetype(library) bind(C, name="FT_Init_FreeType")
-            import :: c_ptr, c_int
-            type(c_ptr), intent(out) :: library
-            integer(c_int) :: ft_init_freetype
-        end function ft_init_freetype
+        function ft_wrapper_init_system_font() bind(C, name="ft_wrapper_init_system_font")
+            import :: c_int
+            integer(c_int) :: ft_wrapper_init_system_font
+        end function ft_wrapper_init_system_font
         
-        function ft_new_face(library, filepath, face_index, face) bind(C, name="FT_New_Face")
-            import :: c_ptr, c_char, c_long, c_int
-            type(c_ptr), value :: library
-            character(kind=c_char), intent(in) :: filepath(*)
-            integer(c_long), value :: face_index
-            type(c_ptr), intent(out) :: face
-            integer(c_int) :: ft_new_face
-        end function ft_new_face
+        subroutine ft_wrapper_cleanup() bind(C, name="ft_wrapper_cleanup")
+        end subroutine ft_wrapper_cleanup
         
-        function ft_set_pixel_sizes(face, pixel_width, pixel_height) bind(C, name="FT_Set_Pixel_Sizes")
-            import :: c_ptr, c_int
-            type(c_ptr), value :: face
-            integer(c_int), value :: pixel_width, pixel_height
-            integer(c_int) :: ft_set_pixel_sizes
-        end function ft_set_pixel_sizes
+        function ft_wrapper_render_char(char_code, glyph_info) bind(C, name="ft_wrapper_render_char")
+            import :: c_int, glyph_info_t
+            integer(c_int), value :: char_code
+            type(glyph_info_t), intent(out) :: glyph_info
+            integer(c_int) :: ft_wrapper_render_char
+        end function ft_wrapper_render_char
         
-        function ft_load_char(face, char_code, load_flags) bind(C, name="FT_Load_Char")
-            import :: c_ptr, c_long, c_int32_t, c_int
-            type(c_ptr), value :: face
-            integer(c_long), value :: char_code
-            integer(c_int32_t), value :: load_flags
-            integer(c_int) :: ft_load_char
-        end function ft_load_char
+        subroutine ft_wrapper_free_glyph(glyph_info) bind(C, name="ft_wrapper_free_glyph")
+            import :: glyph_info_t
+            type(glyph_info_t), intent(inout) :: glyph_info
+        end subroutine ft_wrapper_free_glyph
         
+        function ft_wrapper_render_text(text, width, height, buffer) bind(C, name="ft_wrapper_render_text")
+            import :: c_char, c_int, c_ptr
+            character(kind=c_char), intent(in) :: text(*)
+            integer(c_int), intent(out) :: width, height
+            type(c_ptr), intent(out) :: buffer
+            integer(c_int) :: ft_wrapper_render_text
+        end function ft_wrapper_render_text
         
-        subroutine ft_done_face(face) bind(C, name="FT_Done_Face")
+        subroutine ft_wrapper_free_text_buffer(buffer) bind(C, name="ft_wrapper_free_text_buffer")
             import :: c_ptr
-            type(c_ptr), value :: face
-        end subroutine ft_done_face
+            type(c_ptr), value :: buffer
+        end subroutine ft_wrapper_free_text_buffer
         
-        subroutine ft_done_freetype(library) bind(C, name="FT_Done_FreeType")
-            import :: c_ptr
-            type(c_ptr), value :: library
-        end subroutine ft_done_freetype
-        
-        function ft_render_glyph(slot, render_mode) bind(C, name="FT_Render_Glyph")
-            import :: c_ptr, c_int
-            type(c_ptr), value :: slot
-            integer(c_int), value :: render_mode
-            integer(c_int) :: ft_render_glyph
-        end function ft_render_glyph
+        function ft_wrapper_is_initialized() bind(C, name="ft_wrapper_is_initialized")
+            import :: c_int
+            integer(c_int) :: ft_wrapper_is_initialized
+        end function ft_wrapper_is_initialized
     end interface
     
-    ! FreeType constants
-    integer(c_int32_t), parameter :: FT_LOAD_RENDER = int(z'4', c_int32_t)
-    integer(c_int32_t), parameter :: FT_LOAD_DEFAULT = 0_c_int32_t
-    integer(c_int), parameter :: FT_RENDER_MODE_NORMAL = 0_c_int
-    
     ! Module variables
-    type(c_ptr) :: ft_library = c_null_ptr
-    type(c_ptr) :: ft_face = c_null_ptr
     logical :: text_system_initialized = .false.
     
 contains
@@ -127,9 +65,6 @@ contains
     function init_text_system() result(success)
         logical :: success
         integer(c_int) :: error
-        character(len=256, kind=c_char) :: font_path
-        character(len=:), allocatable :: font_paths(:)
-        integer :: i
         
         success = .false.
         
@@ -138,49 +73,21 @@ contains
             return
         end if
         
-        ! Initialize FreeType library
-        error = ft_init_freetype(ft_library)
+        ! Initialize FreeType using C wrapper
+        error = ft_wrapper_init_system_font()
         if (error /= 0) then
-            print *, "Error: Could not initialize FreeType library"
-            return
-        end if
-        
-        ! Try different system font paths
-        allocate(character(len=64) :: font_paths(4))
-        font_paths(1) = "/System/Library/Fonts/Helvetica.ttc" // c_null_char  ! macOS
-        font_paths(2) = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf" // c_null_char  ! Linux
-        font_paths(3) = "/Windows/Fonts/arial.ttf" // c_null_char  ! Windows
-        font_paths(4) = "/usr/share/fonts/TTF/arial.ttf" // c_null_char  ! Arch Linux
-        
-        do i = 1, size(font_paths)
-            font_path = font_paths(i)
-            error = ft_new_face(ft_library, font_path, 0_c_long, ft_face)
-            if (error == 0) exit
-        end do
-        
-        if (error /= 0) then
-            print *, "Error: Could not load any system font"
-            call ft_done_freetype(ft_library)
-            return
-        end if
-        
-        ! Set font size (12 pixels)
-        error = ft_set_pixel_sizes(ft_face, 0_c_int, 12_c_int)
-        if (error /= 0) then
-            print *, "Error: Could not set font size"
-            call ft_done_face(ft_face)
-            call ft_done_freetype(ft_library)
+            print *, "Error: Could not initialize FreeType wrapper"
             return
         end if
         
         text_system_initialized = .true.
         success = .true.
+        print *, "FreeType: Successfully initialized via C wrapper"
     end function init_text_system
 
     subroutine cleanup_text_system()
         if (text_system_initialized) then
-            call ft_done_face(ft_face)
-            call ft_done_freetype(ft_library)
+            call ft_wrapper_cleanup()
             text_system_initialized = .false.
         end if
     end subroutine cleanup_text_system
@@ -192,7 +99,7 @@ contains
         integer(1), intent(in) :: r, g, b
         integer :: pen_x, pen_y, i, char_code
         integer(c_int) :: error
-        type(c_ptr) :: glyph_slot_ptr
+        type(glyph_info_t) :: glyph_info
         
         print *, "PNG: Rendering text '", trim(text), "' at pixel position:", x, y
         
@@ -212,129 +119,85 @@ contains
         do i = 1, len_trim(text)
             char_code = iachar(text(i:i))
             
-            error = ft_load_char(ft_face, int(char_code, c_long), FT_LOAD_RENDER)
+            error = ft_wrapper_render_char(char_code, glyph_info)
             if (error /= 0) then
                 print *, "PNG: Failed to load character:", text(i:i), "error:", error
                 cycle  ! Skip character if it can't be loaded
             end if
             
             print *, "PNG: Rendering character:", text(i:i), "at pen position:", pen_x, pen_y
-            call render_glyph_bitmap(image_data, width, height, pen_x, pen_y, text(i:i), r, g, b)
-            call advance_pen_position(pen_x)
+            call render_glyph_from_wrapper(image_data, width, height, pen_x, pen_y, glyph_info, r, g, b)
+            pen_x = pen_x + max(glyph_info%advance_x, 6)
+            
+            call ft_wrapper_free_glyph(glyph_info)
         end do
     end subroutine render_text_to_image
 
-    subroutine render_glyph_bitmap(image_data, width, height, pen_x, pen_y, char, r, g, b)
+    subroutine render_glyph_from_wrapper(image_data, width, height, pen_x, pen_y, glyph_info, r, g, b)
         integer(1), intent(inout) :: image_data(*)
         integer, intent(in) :: width, height, pen_x, pen_y
-        character(len=1), intent(in) :: char
+        type(glyph_info_t), intent(in) :: glyph_info
         integer(1), intent(in) :: r, g, b
-        
-        ! Try to get proper FreeType glyph rendering
-        call render_freetype_glyph_direct(image_data, width, height, pen_x, pen_y, char, r, g, b)
-    end subroutine render_glyph_bitmap
-    
-    subroutine render_freetype_glyph_direct(image_data, width, height, pen_x, pen_y, char, r, g, b)
-        integer(1), intent(inout) :: image_data(*)
-        integer, intent(in) :: width, height, pen_x, pen_y
-        character(len=1), intent(in) :: char
-        integer(1), intent(in) :: r, g, b
-        type(c_ptr) :: glyph_slot_ptr
-        type(ft_glyph_slot_rec), pointer :: glyph_slot
         integer(1), pointer :: bitmap_buffer(:)
         integer :: glyph_x, glyph_y, img_x, img_y, row, col, pixel_idx
-        integer :: bitmap_width, bitmap_height, bitmap_left, bitmap_top
         integer(1) :: alpha
         real :: alpha_f, inv_alpha
         
-        ! Since FreeType is loading characters successfully, render a proper character representation
-        print *, "PNG: FreeType character loaded successfully - rendering text"
-        call render_character_bitmap(image_data, width, height, pen_x, pen_y, char, r, g, b)
-        return
-        
-        print *, "PNG: Attempting to convert glyph slot pointer"
-        call c_f_pointer(glyph_slot_ptr, glyph_slot)
-        
-        ! Add safety checks before accessing structure members
-        if (.not. associated(glyph_slot)) then
-            print *, "PNG: Glyph slot pointer conversion failed"
+        if (glyph_info%width <= 0 .or. glyph_info%height <= 0) then
+            print *, "PNG: Empty glyph, using fallback"
             call render_simple_character_block(image_data, width, height, pen_x, pen_y, r, g, b)
             return
         end if
         
-        print *, "PNG: Glyph slot converted successfully"
-        
-        ! Try to safely access bitmap dimensions
-        bitmap_width = 0
-        bitmap_height = 0
-        bitmap_left = 0
-        bitmap_top = 0
-        
-        ! Use block construct for safe access
-        block
-            bitmap_width = glyph_slot%bitmap%width
-            bitmap_height = glyph_slot%bitmap%rows
-            bitmap_left = glyph_slot%bitmap_left
-            bitmap_top = glyph_slot%bitmap_top
-        end block
-        
-        print *, "PNG: Glyph bitmap dimensions:", bitmap_width, "x", bitmap_height
-        print *, "PNG: Glyph positioning:", bitmap_left, bitmap_top
-        
-        if (bitmap_width <= 0 .or. bitmap_height <= 0) then
-            print *, "PNG: No bitmap data, using fallback"
+        if (.not. c_associated(glyph_info%buffer)) then
+            print *, "PNG: No bitmap buffer, using fallback"
             call render_simple_character_block(image_data, width, height, pen_x, pen_y, r, g, b)
             return
         end if
         
-        if (.not. c_associated(glyph_slot%bitmap%buffer)) then
-            print *, "PNG: Bitmap buffer is null, using fallback"
-            call render_simple_character_block(image_data, width, height, pen_x, pen_y, r, g, b)
-            return
-        end if
+        ! Convert C buffer to Fortran pointer
+        call c_f_pointer(glyph_info%buffer, bitmap_buffer, [glyph_info%buffer_size])
         
-        ! Convert buffer pointer to Fortran array
-        call c_f_pointer(glyph_slot%bitmap%buffer, bitmap_buffer, [bitmap_width * bitmap_height])
+        glyph_x = pen_x + glyph_info%left
+        glyph_y = pen_y - glyph_info%top
         
-        glyph_x = pen_x + bitmap_left
-        glyph_y = pen_y - bitmap_top
-        
-        print *, "PNG: Rendering glyph at pixel position:", glyph_x, glyph_y
+        print *, "PNG: Rendering glyph at pixel position:", glyph_x, glyph_y, &
+                 "size:", glyph_info%width, "x", glyph_info%height
         
         ! Render the bitmap onto the image with alpha blending
-        do row = 0, bitmap_height - 1
-            do col = 0, bitmap_width - 1
+        do row = 0, glyph_info%height - 1
+            do col = 0, glyph_info%width - 1
                 img_x = glyph_x + col
                 img_y = glyph_y + row
                 
                 if (img_x >= 0 .and. img_x < width .and. img_y >= 0 .and. img_y < height) then
-                    alpha = bitmap_buffer(row * bitmap_width + col + 1)
-                    if (alpha > 0) then
-                        pixel_idx = img_y * (1 + width * 3) + 1 + img_x * 3 + 1
-                        
-                        if (alpha == -1_1) then  ! 255 in signed byte
-                            ! Fully opaque - use black for text
-                            image_data(pixel_idx) = 0_1
-                            image_data(pixel_idx + 1) = 0_1  
-                            image_data(pixel_idx + 2) = 0_1
-                        else
-                            ! Alpha blending with black text
-                            alpha_f = real(int(alpha, kind=selected_int_kind(2)) + merge(256, 0, alpha < 0)) / 255.0
-                            inv_alpha = 1.0 - alpha_f
-                            
-                            ! Blend towards black (0,0,0)
-                            image_data(pixel_idx) = int(inv_alpha * real(int(image_data(pixel_idx), kind=selected_int_kind(2)) + &
-                                                        merge(256, 0, image_data(pixel_idx) < 0)), 1)
-                            image_data(pixel_idx + 1) = int(inv_alpha * real(int(image_data(pixel_idx + 1), kind=selected_int_kind(2)) + &
-                                                            merge(256, 0, image_data(pixel_idx + 1) < 0)), 1)
-                            image_data(pixel_idx + 2) = int(inv_alpha * real(int(image_data(pixel_idx + 2), kind=selected_int_kind(2)) + &
-                                                            merge(256, 0, image_data(pixel_idx + 2) < 0)), 1)
-                        end if
+                    alpha = bitmap_buffer(row * glyph_info%width + col + 1)
+                    pixel_idx = img_y * (1 + width * 3) + 1 + img_x * 3 + 1
+                    
+                    ! Convert signed byte to unsigned value (0-255)
+                    alpha_f = real(int(alpha, kind=selected_int_kind(2)) + merge(256, 0, alpha < 0)) / 255.0
+                    
+                    ! Threshold for crisp text - treat anything above 50% as solid black
+                    if (alpha_f > 0.5) then
+                        ! Solid black text
+                        image_data(pixel_idx) = 0_1
+                        image_data(pixel_idx + 1) = 0_1
+                        image_data(pixel_idx + 2) = 0_1
+                    else if (alpha_f > 0.1) then
+                        ! Light anti-aliasing only for edges
+                        image_data(pixel_idx) = int(real(int(image_data(pixel_idx), kind=selected_int_kind(2)) + &
+                                                    merge(256, 0, image_data(pixel_idx) < 0)) * (1.0 - alpha_f * 0.8), 1)
+                        image_data(pixel_idx + 1) = int(real(int(image_data(pixel_idx + 1), kind=selected_int_kind(2)) + &
+                                                        merge(256, 0, image_data(pixel_idx + 1) < 0)) * (1.0 - alpha_f * 0.8), 1)
+                        image_data(pixel_idx + 2) = int(real(int(image_data(pixel_idx + 2), kind=selected_int_kind(2)) + &
+                                                        merge(256, 0, image_data(pixel_idx + 2) < 0)) * (1.0 - alpha_f * 0.8), 1)
                     end if
+                    ! Ignore very light pixels (alpha_f <= 0.1) to avoid pixel clouds
                 end if
             end do
         end do
-    end subroutine render_freetype_glyph_direct
+    end subroutine render_glyph_from_wrapper
+    
 
     subroutine render_simple_character_block(image_data, width, height, x, y, r, g, b)
         integer(1), intent(inout) :: image_data(*)
@@ -391,46 +254,6 @@ contains
         end do
     end subroutine render_simple_placeholder
 
-    subroutine advance_pen_position(pen_x)
-        integer, intent(inout) :: pen_x
-        type(c_ptr) :: glyph_slot_ptr
-        type(ft_glyph_slot_rec), pointer :: glyph_slot
-        
-        ! Get glyph slot to read advance
-        call get_glyph_slot_from_face(ft_face, glyph_slot_ptr)
-        if (c_associated(glyph_slot_ptr)) then
-            call c_f_pointer(glyph_slot_ptr, glyph_slot)
-            ! Advance by the glyph's advance value (convert from 26.6 fixed point)
-            pen_x = pen_x + max(int(glyph_slot%advance_x / 64), 6)
-        else
-            ! Default advance if we can't get glyph slot
-            pen_x = pen_x + 8
-        end if
-    end subroutine advance_pen_position
-    
-    subroutine get_glyph_slot_from_face(face, glyph_slot_ptr)
-        type(c_ptr), intent(in) :: face
-        type(c_ptr), intent(out) :: glyph_slot_ptr
-        integer(c_intptr_t) :: face_addr, glyph_addr_location
-        integer(c_intptr_t), pointer :: ptr_value
-        
-        ! The face structure contains a pointer to the glyph slot
-        ! We need to read the pointer value from the structure
-        face_addr = transfer(face, face_addr)
-        glyph_addr_location = face_addr + 24_c_intptr_t
-        
-        ! Read the pointer value stored at that memory location
-        call c_f_pointer(transfer(glyph_addr_location, c_null_ptr), ptr_value)
-        
-        if (associated(ptr_value)) then
-            ! Convert the integer pointer value back to a C pointer
-            glyph_slot_ptr = transfer(ptr_value, glyph_slot_ptr)
-            print *, "PNG: Got glyph slot pointer: T, value associated:", c_associated(glyph_slot_ptr)
-        else
-            glyph_slot_ptr = c_null_ptr
-            print *, "PNG: Got glyph slot pointer: F"
-        end if
-    end subroutine get_glyph_slot_from_face
     
     subroutine render_character_bitmap(image_data, width, height, x, y, char, r, g, b)
         integer(1), intent(inout) :: image_data(*)
