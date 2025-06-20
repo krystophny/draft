@@ -6,9 +6,9 @@ program png_generator
     integer(1) :: png_signature(8) = &
         [int(-119,1), int(80,1), int(78,1), int(71,1), int(13,1), int(10,1), int(26,1), int(10,1)]
     
-    ! Image parameters
-    integer, parameter :: width = 100
-    integer, parameter :: height = 100
+    ! Image parameters (4:3 aspect ratio)
+    integer, parameter :: width = 400
+    integer, parameter :: height = 300
     integer, parameter :: bit_depth = 8
     integer, parameter :: color_type = 2  ! RGB
     
@@ -31,19 +31,9 @@ program png_generator
     ! Write IHDR chunk
     call write_ihdr_chunk(png_unit, width, height, bit_depth, color_type)
     
-    ! Create image data (red square)
+    ! Create image data with plotted line
     allocate(image_data(height * (1 + width * 3)))
-    k = 1
-    do i = 1, height
-        image_data(k) = 0_1  ! Filter type (none)
-        k = k + 1
-        do j = 1, width
-            image_data(k) = -1_1            ! Red (255 as signed byte)
-            image_data(k+1) = 0_1           ! Green
-            image_data(k+2) = 0_1           ! Blue
-            k = k + 3
-        end do
-    end do
+    call create_line_plot(image_data, width, height)
     
     ! Compress image data
     compressed_size = int(size(image_data) * 1.1 + 12, c_long)
@@ -71,6 +61,80 @@ program png_generator
     print *, "PNG file 'output.png' created successfully!"
     
 contains
+
+    subroutine create_line_plot(image_data, w, h)
+        integer(1), intent(out) :: image_data(*)
+        integer, intent(in) :: w, h
+        integer :: i, j, k, y_plot, x_center, y_center
+        real :: x_norm, y_norm, pi
+        
+        pi = 4.0 * atan(1.0)
+        x_center = w / 2
+        y_center = h / 2
+        
+        ! Initialize image with white background
+        k = 1
+        do i = 1, h
+            image_data(k) = 0_1  ! Filter type (none)
+            k = k + 1
+            do j = 1, w
+                image_data(k) = -1_1     ! White background (R=255)
+                image_data(k+1) = -1_1   ! White background (G=255)
+                image_data(k+2) = -1_1   ! White background (B=255)
+                k = k + 3
+            end do
+        end do
+        
+        ! Plot sine wave
+        do j = 1, w
+            x_norm = real(j - 1) / real(w - 1)  ! Normalize x to [0,1]
+            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5  ! Sine wave, normalized to [0,1]
+            y_plot = int(y_norm * real(h - 1)) + 1  ! Convert to pixel coordinates
+            
+            ! Clamp y_plot to valid range
+            if (y_plot < 1) y_plot = 1
+            if (y_plot > h) y_plot = h
+            
+            ! Calculate pixel position in image_data array
+            k = (y_plot - 1) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
+            
+            ! Set pixel to blue for the line
+            image_data(k) = 0_1        ! Red = 0
+            image_data(k+1) = 0_1      ! Green = 0  
+            image_data(k+2) = -1_1     ! Blue = 255
+            
+            ! Add some thickness to the line
+            if (y_plot > 1) then
+                k = (y_plot - 2) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
+                image_data(k) = 0_1        ! Red = 0
+                image_data(k+1) = 0_1      ! Green = 0  
+                image_data(k+2) = -1_1     ! Blue = 255
+            end if
+            if (y_plot < h) then
+                k = y_plot * (1 + w * 3) + 1 + (j - 1) * 3 + 1
+                image_data(k) = 0_1        ! Red = 0
+                image_data(k+1) = 0_1      ! Green = 0  
+                image_data(k+2) = -1_1     ! Blue = 255
+            end if
+        end do
+        
+        ! Add axes
+        ! X-axis (horizontal line at center)
+        do j = 1, w
+            k = (y_center - 1) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
+            image_data(k) = 64_1       ! Dark gray (R=64)
+            image_data(k+1) = 64_1     ! Dark gray (G=64)
+            image_data(k+2) = 64_1     ! Dark gray (B=64)
+        end do
+        
+        ! Y-axis (vertical line at center)
+        do i = 1, h
+            k = (i - 1) * (1 + w * 3) + 1 + (x_center - 1) * 3 + 1
+            image_data(k) = 64_1       ! Dark gray (R=64)
+            image_data(k+1) = 64_1     ! Dark gray (G=64)
+            image_data(k+2) = 64_1     ! Dark gray (B=64)
+        end do
+    end subroutine create_line_plot
 
     subroutine write_chunk(unit, chunk_type, chunk_data, data_size)
         integer, intent(in) :: unit
