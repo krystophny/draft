@@ -189,30 +189,210 @@ contains
         integer(1), intent(inout) :: image_data(*)
         integer, intent(in) :: img_w, img_h, x1, y1, x2, y2
         integer(1), intent(in) :: r, g, b
-        integer :: dx, dy, steps, i
-        real :: x_step, y_step, x, y
         
-        dx = x2 - x1
-        dy = y2 - y1
-        steps = max(abs(dx), abs(dy))
+        ! Use antialiased line drawing
+        call draw_line_wu(image_data, img_w, img_h, real(x1), real(y1), real(x2), real(y2), r, g, b)
+    end subroutine draw_line_segment
+
+    subroutine draw_line_wu(image_data, img_w, img_h, x0, y0, x1, y1, r, g, b)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h
+        real, intent(in) :: x0, y0, x1, y1
+        integer(1), intent(in) :: r, g, b
+        logical :: steep
+        real :: dx, dy, gradient, xend, yend, xgap, xpxl1, ypxl1, xpxl2, ypxl2
+        real :: intery, x, y
+        integer :: ix, iy, i
         
-        if (steps == 0) then
-            call set_pixel(image_data, x1, y1, img_w, img_h, r, g, b)
+        steep = abs(y1 - y0) > abs(x1 - x0)
+        
+        if (steep) then
+            ! Swap x and y coordinates
+            call draw_line_wu_impl(image_data, img_w, img_h, y0, x0, y1, x1, r, g, b, .true.)
+        else
+            call draw_line_wu_impl(image_data, img_w, img_h, x0, y0, x1, y1, r, g, b, .false.)
+        end if
+    end subroutine draw_line_wu
+
+    subroutine draw_line_wu_impl(image_data, img_w, img_h, x0, y0, x1, y1, r, g, b, swapped)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h
+        real, intent(in) :: x0, y0, x1, y1
+        integer(1), intent(in) :: r, g, b
+        logical, intent(in) :: swapped
+        real :: dx, dy, gradient, xend, yend, xgap, xpxl1, ypxl1, xpxl2, ypxl2
+        real :: intery, x_start, y_start, x_end, y_end
+        integer :: ix, iy, i
+        
+        x_start = x0
+        y_start = y0
+        x_end = x1
+        y_end = y1
+        
+        ! Ensure line goes from left to right
+        if (x_start > x_end) then
+            ! Swap points
+            x_start = x1
+            y_start = y1
+            x_end = x0
+            y_end = y0
+        end if
+        
+        dx = x_end - x_start
+        dy = y_end - y_start
+        
+        if (abs(dx) < 1e-6) then
+            ! Vertical line
+            call draw_vertical_line_aa(image_data, img_w, img_h, x_start, y_start, y_end, r, g, b, swapped)
             return
         end if
         
-        x_step = real(dx) / real(steps)
-        y_step = real(dy) / real(steps)
+        gradient = dy / dx
         
-        x = real(x1)
-        y = real(y1)
+        ! Handle first endpoint
+        xend = x_start
+        yend = y_start + gradient * (xend - x_start)
+        xgap = 1.0 - fpart(x_start + 0.5)
+        xpxl1 = xend
+        ypxl1 = ipart(yend)
         
-        do i = 0, steps
-            call set_pixel(image_data, nint(x), nint(y), img_w, img_h, r, g, b)
-            x = x + x_step
-            y = y + y_step
+        call plot_aa_pixel(image_data, img_w, img_h, int(xpxl1), int(ypxl1), &
+                          rfpart(yend) * xgap, r, g, b, swapped)
+        call plot_aa_pixel(image_data, img_w, img_h, int(xpxl1), int(ypxl1) + 1, &
+                          fpart(yend) * xgap, r, g, b, swapped)
+        
+        intery = yend + gradient
+        
+        ! Handle second endpoint  
+        xend = x_end
+        yend = y_end + gradient * (xend - x_end)
+        xgap = fpart(x_end + 0.5)
+        xpxl2 = xend
+        ypxl2 = ipart(yend)
+        
+        call plot_aa_pixel(image_data, img_w, img_h, int(xpxl2), int(ypxl2), &
+                          rfpart(yend) * xgap, r, g, b, swapped)
+        call plot_aa_pixel(image_data, img_w, img_h, int(xpxl2), int(ypxl2) + 1, &
+                          fpart(yend) * xgap, r, g, b, swapped)
+        
+        ! Main loop
+        do i = int(xpxl1) + 1, int(xpxl2) - 1
+            call plot_aa_pixel(image_data, img_w, img_h, i, int(ipart(intery)), &
+                              rfpart(intery), r, g, b, swapped)
+            call plot_aa_pixel(image_data, img_w, img_h, i, int(ipart(intery)) + 1, &
+                              fpart(intery), r, g, b, swapped)
+            intery = intery + gradient
         end do
-    end subroutine draw_line_segment
+    end subroutine draw_line_wu_impl
+
+    subroutine draw_vertical_line_aa(image_data, img_w, img_h, x, y0, y1, r, g, b, swapped)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h
+        real, intent(in) :: x, y0, y1
+        integer(1), intent(in) :: r, g, b
+        logical, intent(in) :: swapped
+        real :: y_start, y_end
+        integer :: i
+        
+        y_start = min(y0, y1)
+        y_end = max(y0, y1)
+        
+        do i = int(y_start), int(y_end)
+            call plot_aa_pixel(image_data, img_w, img_h, int(x), i, 1.0, r, g, b, swapped)
+        end do
+    end subroutine draw_vertical_line_aa
+
+    subroutine plot_aa_pixel(image_data, img_w, img_h, x, y, alpha, r, g, b, swapped)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h, x, y
+        real, intent(in) :: alpha
+        integer(1), intent(in) :: r, g, b
+        logical, intent(in) :: swapped
+        integer :: px, py
+        
+        if (swapped) then
+            px = y
+            py = x
+        else
+            px = x
+            py = y
+        end if
+        
+        call blend_pixel(image_data, img_w, img_h, px, py, alpha, r, g, b)
+    end subroutine plot_aa_pixel
+
+    subroutine blend_pixel(image_data, img_w, img_h, x, y, alpha, new_r, new_g, new_b)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h, x, y
+        real, intent(in) :: alpha
+        integer(1), intent(in) :: new_r, new_g, new_b
+        integer :: k
+        real :: inv_alpha
+        integer :: bg_r, bg_g, bg_b, fg_r, fg_g, fg_b
+        
+        ! Check bounds
+        if (x < 1 .or. x > img_w .or. y < 1 .or. y > img_h) return
+        if (alpha <= 0.0) return
+        
+        ! Calculate pixel position
+        k = (y - 1) * (1 + img_w * 3) + 1 + (x - 1) * 3 + 1
+        
+        if (alpha >= 1.0) then
+            ! Full opacity - just set the color
+            image_data(k) = new_r
+            image_data(k+1) = new_g
+            image_data(k+2) = new_b
+        else
+            ! Alpha blending
+            inv_alpha = 1.0 - alpha
+            
+            ! Get background color (convert from signed to unsigned)
+            bg_r = int(image_data(k))
+            bg_g = int(image_data(k+1))
+            bg_b = int(image_data(k+2))
+            if (bg_r < 0) bg_r = bg_r + 256
+            if (bg_g < 0) bg_g = bg_g + 256
+            if (bg_b < 0) bg_b = bg_b + 256
+            
+            ! Get foreground color (convert from signed to unsigned)
+            fg_r = int(new_r)
+            fg_g = int(new_g)
+            fg_b = int(new_b)
+            if (fg_r < 0) fg_r = fg_r + 256
+            if (fg_g < 0) fg_g = fg_g + 256
+            if (fg_b < 0) fg_b = fg_b + 256
+            
+            ! Blend colors
+            bg_r = int(inv_alpha * real(bg_r) + alpha * real(fg_r))
+            bg_g = int(inv_alpha * real(bg_g) + alpha * real(fg_g))
+            bg_b = int(inv_alpha * real(bg_b) + alpha * real(fg_b))
+            
+            ! Convert back to signed bytes
+            if (bg_r > 127) bg_r = bg_r - 256
+            if (bg_g > 127) bg_g = bg_g - 256
+            if (bg_b > 127) bg_b = bg_b - 256
+            
+            image_data(k) = int(bg_r, 1)
+            image_data(k+1) = int(bg_g, 1)
+            image_data(k+2) = int(bg_b, 1)
+        end if
+    end subroutine blend_pixel
+
+    ! Helper functions for Wu's algorithm
+    real function ipart(x)
+        real, intent(in) :: x
+        ipart = real(int(x))
+    end function ipart
+
+    real function fpart(x)
+        real, intent(in) :: x
+        fpart = x - ipart(x)
+    end function fpart
+
+    real function rfpart(x)
+        real, intent(in) :: x
+        rfpart = 1.0 - fpart(x)
+    end function rfpart
 
     subroutine clamp_coordinates(x, y, max_w, max_h)
         integer, intent(inout) :: x, y
