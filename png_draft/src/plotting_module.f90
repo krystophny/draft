@@ -41,9 +41,9 @@ contains
         
         ctx%width = width
         ctx%height = height
-        ctx%x_min = 0.0
+        ctx%x_min = -1.0
         ctx%x_max = 1.0
-        ctx%y_min = 0.0
+        ctx%y_min = -1.0
         ctx%y_max = 1.0
     end subroutine setup_canvas
     
@@ -60,8 +60,8 @@ contains
         class(plot_context), intent(inout) :: ctx
         
         call ctx%color(0.25, 0.25, 0.25)
-        call ctx%line(0.0, 0.5, 1.0, 0.5)
-        call ctx%line(0.5, 0.0, 0.5, 1.0)
+        call draw_axes_lines(ctx)
+        call draw_axis_ticks(ctx)
     end subroutine draw_coordinate_axes
     
     subroutine save_plot(ctx, filename)
@@ -99,16 +99,40 @@ contains
         real, intent(in) :: t, amplitude, omega
         real, intent(out) :: x, y
         
-        x = t / omega
-        y = 0.5 + amplitude * sin(t)
+        x = (t / omega) * 2.0 - 1.0
+        y = amplitude * sin(t)
     end subroutine calculate_first_point
 
     subroutine calculate_curve_point(t, amplitude, omega, x, y)
         real, intent(in) :: t, amplitude, omega
         real, intent(out) :: x, y
         
-        x = t / omega
-        y = 0.5 + amplitude * sin(t)
+        x = (t / omega) * 2.0 - 1.0
+        y = amplitude * sin(t)
     end subroutine calculate_curve_point
+
+    subroutine draw_axes_lines(ctx)
+        class(plot_context), intent(inout) :: ctx
+        
+        call ctx%line(ctx%x_min, 0.0, ctx%x_max, 0.0)
+        call ctx%line(0.0, ctx%y_min, 0.0, ctx%y_max)
+    end subroutine draw_axes_lines
+
+    subroutine draw_axis_ticks(ctx)
+        class(plot_context), intent(inout) :: ctx
+        real :: tick_size, pos
+        integer :: i
+        
+        tick_size = 0.05
+        
+        do i = -4, 4
+            if (i == 0) cycle
+            pos = real(i) * 0.25
+            if (abs(pos) <= 1.0) then
+                call ctx%line(pos, -tick_size, pos, tick_size)
+                call ctx%line(-tick_size, pos, tick_size, pos)
+            end if
+        end do
+    end subroutine draw_axis_ticks
 
 end module plotting_module

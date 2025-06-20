@@ -40,11 +40,11 @@ contains
         real :: px1, py1, px2, py2
         integer(1) :: r, g, b
         
-        ! Convert normalized coordinates [0,1] to pixel coordinates
-        px1 = x1 * real(this%width - 1) + 1.0
-        py1 = y1 * real(this%height - 1) + 1.0
-        px2 = x2 * real(this%width - 1) + 1.0
-        py2 = y2 * real(this%height - 1) + 1.0
+        ! Convert world coordinates to pixel coordinates
+        px1 = (x1 - this%x_min) / (this%x_max - this%x_min) * real(this%width - 1) + 1.0
+        py1 = (1.0 - (y1 - this%y_min) / (this%y_max - this%y_min)) * real(this%height - 1) + 1.0
+        px2 = (x2 - this%x_min) / (this%x_max - this%x_min) * real(this%width - 1) + 1.0
+        py2 = (1.0 - (y2 - this%y_min) / (this%y_max - this%y_min)) * real(this%height - 1) + 1.0
         
         ! Convert color to signed bytes
         r = color_to_byte(this%current_r)
