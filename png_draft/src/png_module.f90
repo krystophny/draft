@@ -3,7 +3,7 @@ module png_module
     implicit none
     
     private
-    public :: generate_png_with_plot
+    public :: generate_png_with_plot, plot_line
     
 contains
 
@@ -39,7 +39,7 @@ contains
         
         ! Create image data with plotted line
         allocate(image_data(height * (1 + width * 3)))
-        call create_line_plot(image_data, width, height)
+        call create_plot_with_axes(image_data, width, height)
         
         ! Compress image data
         compressed_size = int(size(image_data) * 1.1 + 12, c_long)
@@ -67,17 +67,28 @@ contains
         print *, "PNG file '", trim(filename), "' created successfully!"
     end subroutine generate_png_with_plot
 
-    subroutine create_line_plot(image_data, w, h)
+    subroutine create_plot_with_axes(image_data, w, h)
         integer(1), intent(out) :: image_data(*)
         integer, intent(in) :: w, h
-        integer :: i, j, k, y_plot, x_center, y_center
-        real :: x_norm, y_norm, pi
+        real :: pi
         
         pi = 4.0 * atan(1.0)
-        x_center = w / 2
-        y_center = h / 2
         
         ! Initialize image with white background
+        call initialize_white_background(image_data, w, h)
+        
+        ! Plot continuous sine wave
+        call draw_continuous_sine_wave(image_data, w, h, pi)
+        
+        ! Add coordinate axes
+        call draw_axes(image_data, w, h)
+    end subroutine create_plot_with_axes
+
+    subroutine initialize_white_background(image_data, w, h)
+        integer(1), intent(out) :: image_data(*)
+        integer, intent(in) :: w, h
+        integer :: i, j, k
+        
         k = 1
         do i = 1, h
             image_data(k) = 0_1  ! Filter type (none)
@@ -89,11 +100,16 @@ contains
                 k = k + 3
             end do
         end do
+    end subroutine initialize_white_background
+
+    subroutine draw_axes(image_data, w, h)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: w, h
+        integer :: i, j, k, x_center, y_center
         
-        ! Plot continuous sine wave
-        call draw_continuous_sine_wave(image_data, w, h, pi)
+        x_center = w / 2
+        y_center = h / 2
         
-        ! Add axes
         ! X-axis (horizontal line at center)
         do j = 1, w
             k = (y_center - 1) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
@@ -109,47 +125,104 @@ contains
             image_data(k+1) = 64_1     ! Dark gray (G=64)
             image_data(k+2) = 64_1     ! Dark gray (B=64)
         end do
-    end subroutine create_line_plot
+    end subroutine draw_axes
 
     subroutine draw_continuous_sine_wave(image_data, w, h, pi)
         integer(1), intent(inout) :: image_data(*)
         integer, intent(in) :: w, h
         real, intent(in) :: pi
-        integer :: j, y_prev, y_curr, y_min, y_max, y_step, y
+        real, allocatable :: x_values(:), y_values(:)
+        integer :: i
         real :: x_norm, y_norm
         
-        ! Calculate first point
-        x_norm = 0.0
-        y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
-        y_prev = int(y_norm * real(h - 1)) + 1
-        if (y_prev < 1) y_prev = 1
-        if (y_prev > h) y_prev = h
+        ! Generate sine wave data points
+        allocate(x_values(w), y_values(w))
+        
+        do i = 1, w
+            x_norm = real(i - 1) / real(w - 1)  ! Normalize x to [0,1]
+            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5  ! Sine wave, normalized to [0,1]
+            
+            x_values(i) = x_norm
+            y_values(i) = y_norm
+        end do
+        
+        ! Plot the line using generic function
+        call plot_line(image_data, w, h, x_values, y_values, w, 0_1, 0_1, -1_1)
+        
+        deallocate(x_values, y_values)
+    end subroutine draw_continuous_sine_wave
+
+    subroutine plot_line(image_data, img_w, img_h, x_data, y_data, n_points, r, g, b)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h, n_points
+        real, intent(in) :: x_data(n_points), y_data(n_points)
+        integer(1), intent(in) :: r, g, b
+        integer :: i, x_prev, y_prev, x_curr, y_curr
+        integer :: x_min, x_max, y_min, y_max, x, y
+        
+        if (n_points < 1) return
+        
+        ! Convert first point to pixel coordinates
+        x_prev = int(x_data(1) * real(img_w - 1)) + 1
+        y_prev = int(y_data(1) * real(img_h - 1)) + 1
+        call clamp_coordinates(x_prev, y_prev, img_w, img_h)
         
         ! Draw first point
-        call set_pixel(image_data, 1, y_prev, w, h, 0_1, 0_1, -1_1)
+        call set_pixel(image_data, x_prev, y_prev, img_w, img_h, r, g, b)
         
-        ! Draw line connecting consecutive points
-        do j = 2, w
-            x_norm = real(j - 1) / real(w - 1)
-            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
-            y_curr = int(y_norm * real(h - 1)) + 1
+        ! Draw line segments connecting consecutive points
+        do i = 2, n_points
+            ! Convert current point to pixel coordinates
+            x_curr = int(x_data(i) * real(img_w - 1)) + 1
+            y_curr = int(y_data(i) * real(img_h - 1)) + 1
+            call clamp_coordinates(x_curr, y_curr, img_w, img_h)
             
-            ! Clamp y_curr to valid range
-            if (y_curr < 1) y_curr = 1
-            if (y_curr > h) y_curr = h
+            ! Draw line segment using Bresenham-like algorithm
+            call draw_line_segment(image_data, img_w, img_h, x_prev, y_prev, x_curr, y_curr, r, g, b)
             
-            ! Draw line segment from (j-1, y_prev) to (j, y_curr)
-            y_min = min(y_prev, y_curr)
-            y_max = max(y_prev, y_curr)
-            
-            ! Fill all pixels between previous and current y positions
-            do y = y_min, y_max
-                call set_pixel(image_data, j, y, w, h, 0_1, 0_1, -1_1)
-            end do
-            
+            x_prev = x_curr
             y_prev = y_curr
         end do
-    end subroutine draw_continuous_sine_wave
+    end subroutine plot_line
+
+    subroutine draw_line_segment(image_data, img_w, img_h, x1, y1, x2, y2, r, g, b)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: img_w, img_h, x1, y1, x2, y2
+        integer(1), intent(in) :: r, g, b
+        integer :: dx, dy, steps, i
+        real :: x_step, y_step, x, y
+        
+        dx = x2 - x1
+        dy = y2 - y1
+        steps = max(abs(dx), abs(dy))
+        
+        if (steps == 0) then
+            call set_pixel(image_data, x1, y1, img_w, img_h, r, g, b)
+            return
+        end if
+        
+        x_step = real(dx) / real(steps)
+        y_step = real(dy) / real(steps)
+        
+        x = real(x1)
+        y = real(y1)
+        
+        do i = 0, steps
+            call set_pixel(image_data, nint(x), nint(y), img_w, img_h, r, g, b)
+            x = x + x_step
+            y = y + y_step
+        end do
+    end subroutine draw_line_segment
+
+    subroutine clamp_coordinates(x, y, max_w, max_h)
+        integer, intent(inout) :: x, y
+        integer, intent(in) :: max_w, max_h
+        
+        if (x < 1) x = 1
+        if (x > max_w) x = max_w
+        if (y < 1) y = 1
+        if (y > max_h) y = max_h
+    end subroutine clamp_coordinates
 
     subroutine set_pixel(image_data, x, y, w, h, r, g, b)
         integer(1), intent(inout) :: image_data(*)
