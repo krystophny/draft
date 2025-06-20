@@ -90,38 +90,8 @@ contains
             end do
         end do
         
-        ! Plot sine wave
-        do j = 1, w
-            x_norm = real(j - 1) / real(w - 1)  ! Normalize x to [0,1]
-            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5  ! Sine wave, normalized to [0,1]
-            y_plot = int(y_norm * real(h - 1)) + 1  ! Convert to pixel coordinates
-            
-            ! Clamp y_plot to valid range
-            if (y_plot < 1) y_plot = 1
-            if (y_plot > h) y_plot = h
-            
-            ! Calculate pixel position in image_data array
-            k = (y_plot - 1) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
-            
-            ! Set pixel to blue for the line
-            image_data(k) = 0_1        ! Red = 0
-            image_data(k+1) = 0_1      ! Green = 0  
-            image_data(k+2) = -1_1     ! Blue = 255
-            
-            ! Add some thickness to the line
-            if (y_plot > 1) then
-                k = (y_plot - 2) * (1 + w * 3) + 1 + (j - 1) * 3 + 1
-                image_data(k) = 0_1        ! Red = 0
-                image_data(k+1) = 0_1      ! Green = 0  
-                image_data(k+2) = -1_1     ! Blue = 255
-            end if
-            if (y_plot < h) then
-                k = y_plot * (1 + w * 3) + 1 + (j - 1) * 3 + 1
-                image_data(k) = 0_1        ! Red = 0
-                image_data(k+1) = 0_1      ! Green = 0  
-                image_data(k+2) = -1_1     ! Blue = 255
-            end if
-        end do
+        ! Plot continuous sine wave
+        call draw_continuous_sine_wave(image_data, w, h, pi)
         
         ! Add axes
         ! X-axis (horizontal line at center)
@@ -140,6 +110,64 @@ contains
             image_data(k+2) = 64_1     ! Dark gray (B=64)
         end do
     end subroutine create_line_plot
+
+    subroutine draw_continuous_sine_wave(image_data, w, h, pi)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: w, h
+        real, intent(in) :: pi
+        integer :: j, y_prev, y_curr, y_min, y_max, y_step, y
+        real :: x_norm, y_norm
+        
+        ! Calculate first point
+        x_norm = 0.0
+        y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
+        y_prev = int(y_norm * real(h - 1)) + 1
+        if (y_prev < 1) y_prev = 1
+        if (y_prev > h) y_prev = h
+        
+        ! Draw first point
+        call set_pixel(image_data, 1, y_prev, w, h, 0_1, 0_1, -1_1)
+        
+        ! Draw line connecting consecutive points
+        do j = 2, w
+            x_norm = real(j - 1) / real(w - 1)
+            y_norm = 0.5 * sin(4.0 * pi * x_norm) + 0.5
+            y_curr = int(y_norm * real(h - 1)) + 1
+            
+            ! Clamp y_curr to valid range
+            if (y_curr < 1) y_curr = 1
+            if (y_curr > h) y_curr = h
+            
+            ! Draw line segment from (j-1, y_prev) to (j, y_curr)
+            y_min = min(y_prev, y_curr)
+            y_max = max(y_prev, y_curr)
+            
+            ! Fill all pixels between previous and current y positions
+            do y = y_min, y_max
+                call set_pixel(image_data, j, y, w, h, 0_1, 0_1, -1_1)
+            end do
+            
+            y_prev = y_curr
+        end do
+    end subroutine draw_continuous_sine_wave
+
+    subroutine set_pixel(image_data, x, y, w, h, r, g, b)
+        integer(1), intent(inout) :: image_data(*)
+        integer, intent(in) :: x, y, w, h
+        integer(1), intent(in) :: r, g, b
+        integer :: k
+        
+        ! Check bounds
+        if (x < 1 .or. x > w .or. y < 1 .or. y > h) return
+        
+        ! Calculate pixel position in image_data array
+        k = (y - 1) * (1 + w * 3) + 1 + (x - 1) * 3 + 1
+        
+        ! Set pixel color
+        image_data(k) = r
+        image_data(k+1) = g
+        image_data(k+2) = b
+    end subroutine set_pixel
 
     subroutine write_chunk(unit, chunk_type, chunk_data, data_size)
         integer, intent(in) :: unit
