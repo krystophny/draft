@@ -82,7 +82,6 @@ contains
         
         text_system_initialized = .true.
         success = .true.
-        print *, "FreeType: Successfully initialized via C wrapper"
     end function init_text_system
 
     subroutine cleanup_text_system()
@@ -101,15 +100,10 @@ contains
         integer(c_int) :: error
         type(glyph_info_t) :: glyph_info
         
-        print *, "PNG: Rendering text '", trim(text), "' at pixel position:", x, y
-        
         if (.not. text_system_initialized) then
             if (.not. init_text_system()) then
-                print *, "PNG: Failed to initialize text system, using placeholder"
                 call render_simple_placeholder(image_data, width, height, x, y, r, g, b)
                 return
-            else
-                print *, "PNG: Text system initialized successfully"
             end if
         end if
         
@@ -121,11 +115,8 @@ contains
             
             error = ft_wrapper_render_char(char_code, glyph_info)
             if (error /= 0) then
-                print *, "PNG: Failed to load character:", text(i:i), "error:", error
                 cycle  ! Skip character if it can't be loaded
             end if
-            
-            print *, "PNG: Rendering character:", text(i:i), "at pen position:", pen_x, pen_y
             call render_glyph_from_wrapper(image_data, width, height, pen_x, pen_y, glyph_info, r, g, b)
             pen_x = pen_x + max(glyph_info%advance_x, 6)
             
@@ -141,16 +132,14 @@ contains
         integer(1), pointer :: bitmap_buffer(:)
         integer :: glyph_x, glyph_y, img_x, img_y, row, col, pixel_idx
         integer(1) :: alpha
-        real :: alpha_f, inv_alpha
+        real :: alpha_f, bg_r, bg_g, bg_b
         
         if (glyph_info%width <= 0 .or. glyph_info%height <= 0) then
-            print *, "PNG: Empty glyph, using fallback"
             call render_simple_character_block(image_data, width, height, pen_x, pen_y, r, g, b)
             return
         end if
         
         if (.not. c_associated(glyph_info%buffer)) then
-            print *, "PNG: No bitmap buffer, using fallback"
             call render_simple_character_block(image_data, width, height, pen_x, pen_y, r, g, b)
             return
         end if
@@ -160,9 +149,6 @@ contains
         
         glyph_x = pen_x + glyph_info%left
         glyph_y = pen_y - glyph_info%top
-        
-        print *, "PNG: Rendering glyph at pixel position:", glyph_x, glyph_y, &
-                 "size:", glyph_info%width, "x", glyph_info%height
         
         ! Render the bitmap onto the image with alpha blending
         do row = 0, glyph_info%height - 1
@@ -174,25 +160,18 @@ contains
                     alpha = bitmap_buffer(row * glyph_info%width + col + 1)
                     pixel_idx = img_y * (1 + width * 3) + 1 + img_x * 3 + 1
                     
-                    ! Convert signed byte to unsigned value (0-255)
+                    ! Convert signed byte to unsigned and normalize to 0-1
                     alpha_f = real(int(alpha, kind=selected_int_kind(2)) + merge(256, 0, alpha < 0)) / 255.0
                     
-                    ! Threshold for crisp text - treat anything above 50% as solid black
-                    if (alpha_f > 0.5) then
-                        ! Solid black text
-                        image_data(pixel_idx) = 0_1
-                        image_data(pixel_idx + 1) = 0_1
-                        image_data(pixel_idx + 2) = 0_1
-                    else if (alpha_f > 0.1) then
-                        ! Light anti-aliasing only for edges
-                        image_data(pixel_idx) = int(real(int(image_data(pixel_idx), kind=selected_int_kind(2)) + &
-                                                    merge(256, 0, image_data(pixel_idx) < 0)) * (1.0 - alpha_f * 0.8), 1)
-                        image_data(pixel_idx + 1) = int(real(int(image_data(pixel_idx + 1), kind=selected_int_kind(2)) + &
-                                                        merge(256, 0, image_data(pixel_idx + 1) < 0)) * (1.0 - alpha_f * 0.8), 1)
-                        image_data(pixel_idx + 2) = int(real(int(image_data(pixel_idx + 2), kind=selected_int_kind(2)) + &
-                                                        merge(256, 0, image_data(pixel_idx + 2) < 0)) * (1.0 - alpha_f * 0.8), 1)
-                    end if
-                    ! Ignore very light pixels (alpha_f <= 0.1) to avoid pixel clouds
+                    ! Get background color and blend with black text
+                    bg_r = real(int(image_data(pixel_idx), kind=selected_int_kind(2)) + merge(256, 0, image_data(pixel_idx) < 0))
+                    bg_g = real(int(image_data(pixel_idx + 1), kind=selected_int_kind(2)) + merge(256, 0, image_data(pixel_idx + 1) < 0))
+                    bg_b = real(int(image_data(pixel_idx + 2), kind=selected_int_kind(2)) + merge(256, 0, image_data(pixel_idx + 2) < 0))
+                    
+                    ! Alpha blend: background * (1-alpha) for black text
+                    image_data(pixel_idx) = int(bg_r * (1.0 - alpha_f), 1)
+                    image_data(pixel_idx + 1) = int(bg_g * (1.0 - alpha_f), 1)
+                    image_data(pixel_idx + 2) = int(bg_b * (1.0 - alpha_f), 1)
                 end if
             end do
         end do
@@ -234,7 +213,6 @@ contains
         
         max_idx = height * (1 + width * 3)
         
-        print *, "PNG: Drawing placeholder at", x, y, "with color", int(r), int(g), int(b)
         
         ! Render a simple 5x7 pixel rectangle as placeholder
         do img_y = y, min(y + 6, height - 1)
@@ -245,9 +223,6 @@ contains
                         image_data(pixel_idx) = r
                         image_data(pixel_idx + 1) = g
                         image_data(pixel_idx + 2) = b
-                        print *, "PNG: Set pixel at", img_x, img_y, "index", pixel_idx
-                    else
-                        print *, "PNG: Pixel out of bounds at", img_x, img_y, "index", pixel_idx
                     end if
                 end if
             end do

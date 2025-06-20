@@ -4,7 +4,7 @@ program plot_generator
     use pdf_module
     implicit none
     
-    integer, parameter :: width = 400, height = 300
+    integer, parameter :: width = 640, height = 480
     type(png_context) :: png_canvas
     type(pdf_context) :: pdf_canvas
     
