@@ -48,14 +48,15 @@ contains
         
         ! Add initial content stream setup
         call append_content(ctx, "q" // char(10))  ! Save graphics state
-        call append_content(ctx, "1 0 0 1 0 0 cm" // char(10))  ! Identity matrix
+        call append_content(ctx, "2 w" // char(10))  ! Set line width to 2 (thicker for visibility)
+        call append_content(ctx, "0 0 1 RG" // char(10))  ! Set blue stroke color
     end function create_pdf_plot
     
     subroutine pdf_draw_line(this, x1, y1, x2, y2)
         class(pdf_context), intent(inout) :: this
         real, intent(in) :: x1, y1, x2, y2
         real :: pdf_x1, pdf_y1, pdf_x2, pdf_y2
-        character(len=200) :: line_cmd
+        character(len=300) :: line_cmd
         
         ! Convert normalized coordinates [0,1] to PDF coordinates
         pdf_x1 = x1 * real(this%width)
@@ -63,11 +64,14 @@ contains
         pdf_x2 = x2 * real(this%width)
         pdf_y2 = (1.0 - y2) * real(this%height)
         
-        ! Create PDF path commands
-        write(line_cmd, '(F8.2, 1X, F8.2, 1X, "m", 1X, F8.2, 1X, F8.2, 1X, "l S", A)') &
-            pdf_x1, pdf_y1, pdf_x2, pdf_y2, char(10)
-        
+        ! Create PDF path commands - separate move and line for clarity
+        write(line_cmd, '(F8.2, 1X, F8.2, 1X, "m", A)') pdf_x1, pdf_y1, char(10)
         call append_content(this, trim(line_cmd))
+        
+        write(line_cmd, '(F8.2, 1X, F8.2, 1X, "l", A)') pdf_x2, pdf_y2, char(10)
+        call append_content(this, trim(line_cmd))
+        
+        call append_content(this, "S" // char(10))  ! Stroke the path
     end subroutine pdf_draw_line
     
     subroutine pdf_set_color(this, r, g, b)
@@ -88,28 +92,18 @@ contains
         class(pdf_context), intent(inout) :: this
         character(len=*), intent(in) :: filename
         integer :: unit
-        character(len=:), allocatable :: compressed_content
-        integer(c_long) :: compressed_size
-        integer :: status
         
         ! Close graphics state
         call append_content(this, "Q" // char(10))
         
-        ! Compress content using zlib
-        call compress_pdf_content(this%content, compressed_content, compressed_size, status)
-        
-        if (status /= 0) then
-            print *, "PDF compression failed with status:", status
-            return
-        end if
-        
-        ! Write PDF file
+        ! Write uncompressed PDF file
         open(newunit=unit, file=filename, access='stream', form='unformatted', status='replace')
         call write_pdf_header(unit)
-        call write_pdf_objects(unit, this%width, this%height, compressed_content, int(compressed_size))
+        call write_pdf_objects_uncompressed(unit, this%width, this%height, this%content)
         close(unit)
         
         print *, "PDF file '", trim(filename), "' created successfully!"
+        print *, "Content length:", len(this%content)
     end subroutine pdf_finalize
     
     subroutine append_content(ctx, text)
@@ -164,12 +158,15 @@ contains
         call write_pdf_string(unit, header)
     end subroutine write_pdf_header
     
-    subroutine write_pdf_objects(unit, width, height, content, content_len)
-        integer, intent(in) :: unit, width, height, content_len
+    subroutine write_pdf_objects_uncompressed(unit, width, height, content)
+        integer, intent(in) :: unit, width, height
         character(len=*), intent(in) :: content
         character(len=1000) :: obj_str
         character(len=100) :: len_str, size_str
-        integer :: obj1_pos, obj2_pos, obj3_pos, xref_pos
+        integer :: obj1_pos, obj2_pos, obj3_pos, obj4_pos, xref_pos
+        integer :: content_len
+        
+        content_len = len(content)
         
         ! Object 1: Catalog
         obj1_pos = get_file_position(unit)
@@ -195,37 +192,38 @@ contains
         
         ! Object 3: Page  
         obj3_pos = get_file_position(unit)
-        write(len_str, '(I0)') content_len
         obj_str = "3 0 obj" // char(10) // &
                  "<<" // char(10) // &
                  "/Type /Page" // char(10) // &
                  "/Parent 2 0 R" // char(10) // &
                  "/MediaBox [0 0 " // trim(size_str) // "]" // char(10) // &
                  "/Contents 4 0 R" // char(10) // &
+                 "/Resources <<>>" // char(10) // &
                  ">>" // char(10) // &
                  "endobj" // char(10)
         call write_pdf_string(unit, obj_str)
         
-        ! Object 4: Content stream
+        ! Object 4: Content stream (uncompressed)
+        obj4_pos = get_file_position(unit)
+        write(len_str, '(I0)') content_len
         obj_str = "4 0 obj" // char(10) // &
                  "<<" // char(10) // &
                  "/Length " // trim(len_str) // char(10) // &
-                 "/Filter /FlateDecode" // char(10) // &
                  ">>" // char(10) // &
                  "stream" // char(10)
         call write_pdf_string(unit, obj_str)
         
-        ! Write compressed content
-        call write_pdf_binary(unit, content, content_len)
+        ! Write uncompressed content directly
+        call write_pdf_string(unit, content)
         
         obj_str = char(10) // "endstream" // char(10) // "endobj" // char(10)
         call write_pdf_string(unit, obj_str)
         
         ! Write xref table and trailer
         xref_pos = get_file_position(unit)
-        call write_xref_table(unit, obj1_pos, obj2_pos, obj3_pos)
+        call write_xref_table_uncompressed(unit, obj1_pos, obj2_pos, obj3_pos, obj4_pos)
         call write_trailer(unit, xref_pos)
-    end subroutine write_pdf_objects
+    end subroutine write_pdf_objects_uncompressed
     
     integer function get_file_position(unit)
         integer, intent(in) :: unit
@@ -261,17 +259,17 @@ contains
         deallocate(bytes)
     end subroutine write_pdf_binary
     
-    subroutine write_xref_table(unit, obj1_pos, obj2_pos, obj3_pos)
-        integer, intent(in) :: unit, obj1_pos, obj2_pos, obj3_pos
-        character(len=200) :: xref_str
+    subroutine write_xref_table_uncompressed(unit, obj1_pos, obj2_pos, obj3_pos, obj4_pos)
+        integer, intent(in) :: unit, obj1_pos, obj2_pos, obj3_pos, obj4_pos
+        character(len=300) :: xref_str
         
         write(xref_str, '("xref", A, "0 5", A, "0000000000 65535 f ", A, &
                          &I10.10, " 00000 n ", A, I10.10, " 00000 n ", A, &
-                         &I10.10, " 00000 n ", A, "0000000000 65535 f ", A)') &
+                         &I10.10, " 00000 n ", A, I10.10, " 00000 n ", A)') &
                char(10), char(10), char(10), obj1_pos, char(10), obj2_pos, char(10), &
-               obj3_pos, char(10), char(10)
+               obj3_pos, char(10), obj4_pos, char(10)
         call write_pdf_string(unit, trim(xref_str))
-    end subroutine write_xref_table
+    end subroutine write_xref_table_uncompressed
     
     subroutine write_trailer(unit, xref_pos)
         integer, intent(in) :: unit, xref_pos
