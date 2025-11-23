@@ -79,6 +79,10 @@ BenchmarkResult benchmark_many_body_cuda(size_t n, int num_iterations) {
 
     double softening = 0.01;
 
+    // Warmup
+    many_body_force_cuda(x_d, y_d, z_d, mass_d, fx_d, fy_d, fz_d,
+                        n, softening);
+
     Timer timer;
     timer.start();
     for (int iter = 0; iter < num_iterations; ++iter) {

@@ -116,6 +116,11 @@ BenchmarkResult benchmark_particle_push_cuda(size_t n, int num_iterations) {
     double dt = 0.01;
     double qm = -1.0;
 
+    // Warmup
+    particle_push_cuda(x_d, y_d, z_d, vx_d, vy_d, vz_d,
+                      ex_d, ey_d, ez_d, bx_d, by_d, bz_d,
+                      dt, qm, n);
+
     Timer timer;
     timer.start();
     for (int iter = 0; iter < num_iterations; ++iter) {

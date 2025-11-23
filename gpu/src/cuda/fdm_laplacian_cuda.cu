@@ -56,6 +56,9 @@ BenchmarkResult benchmark_fdm_laplacian_cuda(int n, int num_iterations) {
 
     double dx = 0.1;
 
+    // Warmup
+    fdm_laplacian_cuda(u_d, lu_d, n, n, n, dx);
+
     Timer timer;
     timer.start();
     for (int iter = 0; iter < num_iterations; ++iter) {
