@@ -34,7 +34,8 @@ build:
 benchmark: build
 	@mkdir -p results
 	@echo "Running GPU benchmarks..."
-	cd $(BUILD_DIR) && ./benchmarks/run_all_benchmarks
+	OMP_NUM_THREADS=$$(nproc) OMP_PROC_BIND=spread OMP_PLACES=threads \
+		cd $(BUILD_DIR) && ./benchmarks/run_all_benchmarks
 
 visualize:
 	@echo "Generating visualizations..."

@@ -9,44 +9,44 @@ SUMMARY STATISTICS
 
 ParticlePush Kernel:
   OpenMP:
-    CPU Time:         5.621 ms
-    GPU Time:         6.587 ms
-    Speedup:           0.85x
-    GPU GFLOPS:        7.59
-    GPU BW:           14.57 GB/s
+    CPU Time:         6.362 ms
+    GPU Time:         4.586 ms
+    Speedup:           1.39x
+    GPU GFLOPS:       10.90
+    GPU BW:           20.94 GB/s
   Kokkos:
-    CPU Time:         0.410 ms
-    GPU Time:         0.379 ms
-    Speedup:           1.08x
-    GPU GFLOPS:      131.86
-    GPU BW:          253.18 GB/s
+    CPU Time:         0.403 ms
+    GPU Time:         0.376 ms
+    Speedup:           1.07x
+    GPU GFLOPS:      133.04
+    GPU BW:          255.44 GB/s
 
 FDM_Laplacian Kernel:
   OpenMP:
-    CPU Time:         2.052 ms
-    GPU Time:         6.985 ms
-    Speedup:           0.29x
-    GPU GFLOPS:        2.40
-    GPU BW:           19.22 GB/s
+    CPU Time:         1.490 ms
+    GPU Time:         2.995 ms
+    Speedup:           0.50x
+    GPU GFLOPS:        5.60
+    GPU BW:           44.82 GB/s
   Kokkos:
-    CPU Time:         0.133 ms
-    GPU Time:         0.099 ms
-    Speedup:           1.34x
-    GPU GFLOPS:      170.28
-    GPU BW:         1362.26 GB/s
+    CPU Time:         0.119 ms
+    GPU Time:         0.096 ms
+    Speedup:           1.24x
+    GPU GFLOPS:      174.08
+    GPU BW:         1392.63 GB/s
 
 ManyBody Kernel:
   OpenMP:
-    CPU Time:         3.353 ms
-    GPU Time:         3.091 ms
-    Speedup:           1.08x
-    GPU GFLOPS:      108.56
-    GPU BW:            0.04 GB/s
+    CPU Time:         2.572 ms
+    GPU Time:         6.890 ms
+    Speedup:           0.37x
+    GPU GFLOPS:       48.70
+    GPU BW:            0.02 GB/s
   Kokkos:
-    CPU Time:         3.248 ms
-    GPU Time:         3.231 ms
+    CPU Time:         3.241 ms
+    GPU Time:         3.221 ms
     Speedup:           1.01x
-    GPU GFLOPS:      103.86
+    GPU GFLOPS:      104.18
     GPU BW:            0.04 GB/s
 
 ================================================================================
@@ -54,8 +54,8 @@ ManyBody Kernel:
 RECOMMENDATIONS
 --------------------------------------------------------------------------------
 
-ParticlePush: Fastest implementation is CUDA (0.373 ms, 134.15 GFLOPS)
-FDM_Laplacian: Fastest implementation is Kokkos (0.099 ms, 170.28 GFLOPS)
-ManyBody: Fastest implementation is OpenMP (3.091 ms, 108.56 GFLOPS)
+ParticlePush: Fastest implementation is CUDA (0.371 ms, 134.93 GFLOPS)
+FDM_Laplacian: Fastest implementation is Kokkos (0.096 ms, 174.08 GFLOPS)
+ManyBody: Fastest implementation is Kokkos (3.221 ms, 104.18 GFLOPS)
 
 ================================================================================
