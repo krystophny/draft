@@ -3,14 +3,16 @@
 #include <cmath>
 #include "benchmark_common.h"
 
-void fdm_laplacian_kokkos(Kokkos::View<const double***> u,
-                          Kokkos::View<double***> lu,
-                          int nx, int ny, int nz, double dx)
+template<typename ExecutionSpace>
+void fdm_laplacian_kokkos_impl(
+    Kokkos::View<const double***, typename ExecutionSpace::memory_space> u,
+    Kokkos::View<double***, typename ExecutionSpace::memory_space> lu,
+    int nx, int ny, int nz, double dx)
 {
     double inv_dx2 = 1.0 / (dx * dx);
 
     Kokkos::parallel_for("FDMLaplacian",
-        Kokkos::MDRangePolicy<Kokkos::Rank<3>>({1, 1, 1}, {nz-1, ny-1, nx-1}),
+        Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<3>>({1, 1, 1}, {nz-1, ny-1, nx-1}),
         KOKKOS_LAMBDA(const int k, const int j, const int i) {
             lu(k, j, i) = inv_dx2 * (
                 u(k, j, i-1) + u(k, j, i+1) +
@@ -31,27 +33,60 @@ BenchmarkResult benchmark_fdm_laplacian_kokkos(int n, int num_iterations,
         u_h[i] = sin(i * 0.001);
     }
 
-    Kokkos::View<double***> u("u", n, n, n);
-    Kokkos::View<double***> lu("lu", n, n, n);
+    double dx = 0.1;
+    double elapsed_ms = 0.0;
 
-    auto u_mirror = Kokkos::create_mirror_view(u);
-    for (int k = 0; k < n; ++k) {
-        for (int j = 0; j < n; ++j) {
-            for (int i = 0; i < n; ++i) {
-                u_mirror(k, j, i) = u_h[i + n * j + n * n * k];
+    if (use_gpu) {
+#ifdef KOKKOS_ENABLE_CUDA
+        using MemSpace = Kokkos::CudaSpace;
+        using ExecSpace = Kokkos::Cuda;
+
+        Kokkos::View<double***, MemSpace> u("u", n, n, n);
+        Kokkos::View<double***, MemSpace> lu("lu", n, n, n);
+
+        auto u_mirror = Kokkos::create_mirror_view(u);
+        for (int k = 0; k < n; ++k) {
+            for (int j = 0; j < n; ++j) {
+                for (int i = 0; i < n; ++i) {
+                    u_mirror(k, j, i) = u_h[i + n * j + n * n * k];
+                }
             }
         }
-    }
-    Kokkos::deep_copy(u, u_mirror);
+        Kokkos::deep_copy(u, u_mirror);
 
-    double dx = 0.1;
+        fdm_laplacian_kokkos_impl<ExecSpace>(u, lu, n, n, n, dx);
 
-    Timer timer;
-    timer.start();
-    for (int iter = 0; iter < num_iterations; ++iter) {
-        fdm_laplacian_kokkos(u, lu, n, n, n, dx);
+        Timer timer;
+        timer.start();
+        for (int iter = 0; iter < num_iterations; ++iter) {
+            fdm_laplacian_kokkos_impl<ExecSpace>(u, lu, n, n, n, dx);
+        }
+        elapsed_ms = timer.stop();
+#endif
+    } else {
+#ifdef KOKKOS_ENABLE_OPENMP
+        using MemSpace = Kokkos::HostSpace;
+        using ExecSpace = Kokkos::OpenMP;
+
+        Kokkos::View<double***, MemSpace> u("u", n, n, n);
+        Kokkos::View<double***, MemSpace> lu("lu", n, n, n);
+
+        for (int k = 0; k < n; ++k) {
+            for (int j = 0; j < n; ++j) {
+                for (int i = 0; i < n; ++i) {
+                    u(k, j, i) = u_h[i + n * j + n * n * k];
+                }
+            }
+        }
+
+        Timer timer;
+        timer.start();
+        for (int iter = 0; iter < num_iterations; ++iter) {
+            fdm_laplacian_kokkos_impl<ExecSpace>(u, lu, n, n, n, dx);
+        }
+        elapsed_ms = timer.stop();
+#endif
     }
-    double elapsed_ms = timer.stop();
 
     BenchmarkResult result;
     result.kernel_name = "FDM_Laplacian";
