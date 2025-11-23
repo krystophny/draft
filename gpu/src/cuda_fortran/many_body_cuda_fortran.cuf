@@ -1,0 +1,63 @@
+module many_body_cuda_fortran_m
+    use iso_fortran_env, only: dp => real64
+    implicit none
+
+contains
+
+    attributes(global) subroutine many_body_force_kernel( &
+        x, y, z, mass, fx, fy, fz, n, softening)
+        real(dp), intent(in) :: x(*), y(*), z(*), mass(*)
+        real(dp), intent(out) :: fx(*), fy(*), fz(*)
+        integer, value :: n
+        real(dp), value :: softening
+
+        integer :: i, j
+        real(dp) :: xi, yi, zi, fxi, fyi, fzi
+        real(dp) :: dx_val, dy_val, dz_val, r2, r, r3, f
+
+        i = blockDim%x * (blockIdx%x - 1) + threadIdx%x
+        if (i > n) return
+
+        xi = x(i)
+        yi = y(i)
+        zi = z(i)
+        fxi = 0.0d0
+        fyi = 0.0d0
+        fzi = 0.0d0
+
+        do j = 1, n
+            dx_val = x(j) - xi
+            dy_val = y(j) - yi
+            dz_val = z(j) - zi
+            r2 = dx_val*dx_val + dy_val*dy_val + dz_val*dz_val + &
+                 softening*softening
+            r = sqrt(r2)
+            r3 = r2 * r
+            f = mass(j) / r3
+            fxi = fxi + f * dx_val
+            fyi = fyi + f * dy_val
+            fzi = fzi + f * dz_val
+        end do
+
+        fx(i) = fxi
+        fy(i) = fyi
+        fz(i) = fzi
+    end subroutine many_body_force_kernel
+
+    subroutine many_body_force_cuda_fortran( &
+        x, y, z, mass, fx, fy, fz, n, softening)
+        real(dp), device, intent(in) :: x(:), y(:), z(:), mass(:)
+        real(dp), device, intent(out) :: fx(:), fy(:), fz(:)
+        integer, intent(in) :: n
+        real(dp), intent(in) :: softening
+
+        integer :: blockSize, numBlocks
+
+        blockSize = 256
+        numBlocks = (n + blockSize - 1) / blockSize
+
+        call many_body_force_kernel<<<numBlocks, blockSize>>>( &
+            x, y, z, mass, fx, fy, fz, n, softening)
+    end subroutine many_body_force_cuda_fortran
+
+end module many_body_cuda_fortran_m

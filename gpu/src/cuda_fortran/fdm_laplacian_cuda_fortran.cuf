@@ -1,0 +1,51 @@
+module fdm_laplacian_cuda_fortran_m
+    use iso_fortran_env, only: dp => real64
+    implicit none
+
+contains
+
+    attributes(global) subroutine fdm_laplacian_kernel(u, lu, nx, ny, nz, dx)
+        real(dp), intent(in) :: u(*)
+        real(dp), intent(out) :: lu(*)
+        integer, value :: nx, ny, nz
+        real(dp), value :: dx
+
+        integer :: i, j, k, idx
+        real(dp) :: inv_dx2
+
+        i = blockDim%x * (blockIdx%x - 1) + threadIdx%x
+        j = blockDim%y * (blockIdx%y - 1) + threadIdx%y
+        k = blockDim%z * (blockIdx%z - 1) + threadIdx%z
+
+        if (i < 2 .or. i >= nx .or. j < 2 .or. j >= ny .or. &
+            k < 2 .or. k >= nz) return
+
+        idx = i + nx * (j - 1 + ny * (k - 1))
+        inv_dx2 = 1.0d0 / (dx * dx)
+
+        lu(idx) = inv_dx2 * ( &
+            u(idx-1) + u(idx+1) + &
+            u(idx-nx) + u(idx+nx) + &
+            u(idx-nx*ny) + u(idx+nx*ny) - &
+            6.0d0 * u(idx) &
+        )
+    end subroutine fdm_laplacian_kernel
+
+    subroutine fdm_laplacian_cuda_fortran(u, lu, nx, ny, nz, dx)
+        real(dp), device, intent(in) :: u(:)
+        real(dp), device, intent(out) :: lu(:)
+        integer, intent(in) :: nx, ny, nz
+        real(dp), intent(in) :: dx
+
+        integer :: blockSize(3), numBlocks(3)
+
+        blockSize = [8, 8, 8]
+        numBlocks(1) = (nx + blockSize(1) - 1) / blockSize(1)
+        numBlocks(2) = (ny + blockSize(2) - 1) / blockSize(2)
+        numBlocks(3) = (nz + blockSize(3) - 1) / blockSize(3)
+
+        call fdm_laplacian_kernel<<<numBlocks, blockSize>>>( &
+            u, lu, nx, ny, nz, dx)
+    end subroutine fdm_laplacian_cuda_fortran
+
+end module fdm_laplacian_cuda_fortran_m
