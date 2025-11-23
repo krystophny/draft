@@ -12,7 +12,7 @@ __global__ void fdm_laplacian_kernel(
 
     if (i >= nx-1 || j >= ny-1 || k >= nz-1) return;
 
-    int idx = i + nx * (j + ny * k);
+    int idx = i + nx * j + nx * ny * k;
     double inv_dx2 = 1.0 / (dx * dx);
 
     lu[idx] = inv_dx2 * (

@@ -16,3 +16,6 @@ if(OPENMP_GPU_ENABLED)
         target_link_options(openmp_kernels PRIVATE ${OPENMP_OFFLOAD_FLAGS})
     endif()
 endif()
+
+# OpenMP Fortran disabled - NVHPC requires localrc for external CUDA
+message(STATUS "OpenMP Fortran disabled (NVHPC requires localrc for external CUDA)")

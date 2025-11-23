@@ -35,36 +35,12 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -march=native -Wall")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --use_fast_math")
 
 # OpenMP offload flags
-# Note: NVHPC requires CUDA runtime to be available
-if(CMAKE_CXX_COMPILER_ID MATCHES "NVHPC|PGI")
-    if(DEFINED ENV{CUDA_HOME})
-        set(CUDA_PATH $ENV{CUDA_HOME})
-    elseif(DEFINED CUDAToolkit_ROOT)
-        set(CUDA_PATH ${CUDAToolkit_ROOT})
-    else()
-        set(CUDA_PATH "/opt/cuda")
-    endif()
-    set(OPENMP_OFFLOAD_FLAGS "-mp=gpu" "-gpu=cc80,cc86" "-cuda" "-L${CUDA_PATH}/lib64" "-lcudart")
-    set(OPENMP_GPU_ENABLED TRUE)
-    message(STATUS "OpenMP GPU offload enabled with NVHPC using CUDA at ${CUDA_PATH}")
-else()
-    set(OPENMP_OFFLOAD_FLAGS "")
-    set(OPENMP_GPU_ENABLED FALSE)
-    message(STATUS "OpenMP GPU offload not available with current compiler")
-endif()
-
-if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC|PGI")
-    if(DEFINED ENV{CUDA_HOME})
-        set(CUDA_PATH $ENV{CUDA_HOME})
-    elseif(DEFINED CUDAToolkit_ROOT)
-        set(CUDA_PATH ${CUDAToolkit_ROOT})
-    else()
-        set(CUDA_PATH "/opt/cuda")
-    endif()
-    set(OPENMP_FORTRAN_OFFLOAD_FLAGS "-mp=gpu" "-gpu=cc80,cc86" "-cuda" "-L${CUDA_PATH}/lib64" "-lcudart")
-else()
-    set(OPENMP_FORTRAN_OFFLOAD_FLAGS "")
-endif()
+# Note: NVHPC with external CUDA requires localrc configuration
+# Disabled for now due to NVHPC 25.9 not finding external CUDA 13.0
+set(OPENMP_OFFLOAD_FLAGS "")
+set(OPENMP_GPU_ENABLED FALSE)
+set(OPENMP_FORTRAN_OFFLOAD_FLAGS "")
+message(STATUS "OpenMP GPU offload disabled (NVHPC requires localrc for external CUDA)")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

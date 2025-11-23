@@ -38,7 +38,7 @@ BenchmarkResult benchmark_fdm_laplacian_kokkos(int n, int num_iterations,
     for (int k = 0; k < n; ++k) {
         for (int j = 0; j < n; ++j) {
             for (int i = 0; i < n; ++i) {
-                u_mirror(k, j, i) = u_h[i + n * (j + n * k)];
+                u_mirror(k, j, i) = u_h[i + n * j + n * n * k];
             }
         }
     }

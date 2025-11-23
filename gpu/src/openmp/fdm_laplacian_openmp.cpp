@@ -12,7 +12,7 @@ void fdm_laplacian_openmp_cpu(const double* u, double* lu,
     for (int k = 1; k < nz-1; ++k) {
         for (int j = 1; j < ny-1; ++j) {
             for (int i = 1; i < nx-1; ++i) {
-                int idx = i + nx * (j + ny * k);
+                int idx = i + nx * j + nx * ny * k;
                 lu[idx] = inv_dx2 * (
                     u[idx-1] + u[idx+1] +
                     u[idx-nx] + u[idx+nx] +
@@ -36,7 +36,7 @@ void fdm_laplacian_openmp_gpu(const double* u, double* lu,
     for (int k = 1; k < nz-1; ++k) {
         for (int j = 1; j < ny-1; ++j) {
             for (int i = 1; i < nx-1; ++i) {
-                int idx = i + nx * (j + ny * k);
+                int idx = i + nx * j + nx * ny * k;
                 lu[idx] = inv_dx2 * (
                     u[idx-1] + u[idx+1] +
                     u[idx-nx] + u[idx+nx] +
