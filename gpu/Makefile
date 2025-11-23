@@ -2,6 +2,7 @@
 
 BUILD_DIR := build
 NINJA := ninja
+NVHPC_ROOT := /opt/nvidia/hpc_sdk/Linux_x86_64/25.9/compilers
 
 all: build
 

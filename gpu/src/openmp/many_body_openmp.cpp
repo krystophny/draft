@@ -41,8 +41,38 @@ void many_body_force_openmp_gpu(
     const double* mass, double* fx, double* fy, double* fz,
     size_t n, double softening)
 {
-    // GPU offload disabled - fall back to CPU implementation
+#ifdef _OPENMP
+    #pragma omp target teams distribute parallel for \
+        map(to: x[0:n], y[0:n], z[0:n], mass[0:n]) \
+        map(from: fx[0:n], fy[0:n], fz[0:n])
+    for (size_t i = 0; i < n; ++i) {
+        double xi = x[i];
+        double yi = y[i];
+        double zi = z[i];
+        double fxi = 0.0;
+        double fyi = 0.0;
+        double fzi = 0.0;
+
+        for (size_t j = 0; j < n; ++j) {
+            double dx = x[j] - xi;
+            double dy = y[j] - yi;
+            double dz = z[j] - zi;
+            double r2 = dx*dx + dy*dy + dz*dz + softening*softening;
+            double r = sqrt(r2);
+            double r3 = r2 * r;
+            double f = mass[j] / r3;
+            fxi += f * dx;
+            fyi += f * dy;
+            fzi += f * dz;
+        }
+
+        fx[i] = fxi;
+        fy[i] = fyi;
+        fz[i] = fzi;
+    }
+#else
     many_body_force_openmp_cpu(x, y, z, mass, fx, fy, fz, n, softening);
+#endif
 }
 
 BenchmarkResult benchmark_many_body_openmp(size_t n, int num_iterations,

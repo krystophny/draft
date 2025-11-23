@@ -1,0 +1,61 @@
+================================================================================
+GPU BENCHMARK REPORT
+Plasma Physics Kernels Performance Analysis
+================================================================================
+
+SUMMARY STATISTICS
+--------------------------------------------------------------------------------
+
+
+ParticlePush Kernel:
+  OpenMP:
+    CPU Time:         5.115 ms
+    GPU Time:         5.236 ms
+    Speedup:           0.98x
+    GPU GFLOPS:        9.55
+    GPU BW:           18.33 GB/s
+  Kokkos:
+    CPU Time:         0.400 ms
+    GPU Time:         0.372 ms
+    Speedup:           1.08x
+    GPU GFLOPS:      134.30
+    GPU BW:          257.86 GB/s
+
+FDM_Laplacian Kernel:
+  OpenMP:
+    CPU Time:         3.325 ms
+    GPU Time:         2.603 ms
+    Speedup:           1.28x
+    GPU GFLOPS:        6.44
+    GPU BW:           51.55 GB/s
+  Kokkos:
+    CPU Time:         0.120 ms
+    GPU Time:         0.174 ms
+    Speedup:           0.69x
+    GPU GFLOPS:       96.51
+    GPU BW:          772.07 GB/s
+
+ManyBody Kernel:
+  OpenMP:
+    CPU Time:         1.434 ms
+    GPU Time:         5.276 ms
+    Speedup:           0.27x
+    GPU GFLOPS:       63.59
+    GPU BW:            0.02 GB/s
+  Kokkos:
+    CPU Time:         3.241 ms
+    GPU Time:         3.221 ms
+    Speedup:           1.01x
+    GPU GFLOPS:      104.18
+    GPU BW:            0.04 GB/s
+
+================================================================================
+
+RECOMMENDATIONS
+--------------------------------------------------------------------------------
+
+ParticlePush: Fastest implementation is Kokkos (0.372 ms, 134.30 GFLOPS)
+FDM_Laplacian: Fastest implementation is Kokkos (0.174 ms, 96.51 GFLOPS)
+ManyBody: Fastest implementation is Kokkos (3.221 ms, 104.18 GFLOPS)
+
+================================================================================

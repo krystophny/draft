@@ -61,8 +61,54 @@ void particle_push_openmp_gpu(
     const double* bx, const double* by, const double* bz,
     double dt, double qm, size_t n)
 {
-    // GPU offload disabled - fall back to CPU implementation
+#ifdef _OPENMP
+    #pragma omp target teams distribute parallel for \
+        map(tofrom: x[0:n], y[0:n], z[0:n], vx[0:n], vy[0:n], vz[0:n]) \
+        map(to: ex[0:n], ey[0:n], ez[0:n], bx[0:n], by[0:n], bz[0:n])
+    for (size_t i = 0; i < n; ++i) {
+        double vx_local = vx[i];
+        double vy_local = vy[i];
+        double vz_local = vz[i];
+
+        double qmdt = qm * dt;
+        double qmdt2 = 0.5 * qmdt;
+
+        vx_local += qmdt2 * ex[i];
+        vy_local += qmdt2 * ey[i];
+        vz_local += qmdt2 * ez[i];
+
+        double tx = qmdt2 * bx[i];
+        double ty = qmdt2 * by[i];
+        double tz = qmdt2 * bz[i];
+
+        double ux = vx_local + vy_local * tz - vz_local * ty;
+        double uy = vy_local + vz_local * tx - vx_local * tz;
+        double uz = vz_local + vx_local * ty - vy_local * tx;
+
+        double denom = 1.0 + tx * tx + ty * ty + tz * tz;
+        double sx = 2.0 * tx / denom;
+        double sy = 2.0 * ty / denom;
+        double sz = 2.0 * tz / denom;
+
+        vx_local = vx_local + uy * sz - uz * sy;
+        vy_local = vy_local + uz * sx - ux * sz;
+        vz_local = vz_local + ux * sy - uy * sx;
+
+        vx_local += qmdt2 * ex[i];
+        vy_local += qmdt2 * ey[i];
+        vz_local += qmdt2 * ez[i];
+
+        vx[i] = vx_local;
+        vy[i] = vy_local;
+        vz[i] = vz_local;
+
+        x[i] += vx_local * dt;
+        y[i] += vy_local * dt;
+        z[i] += vz_local * dt;
+    }
+#else
     particle_push_openmp_cpu(x, y, z, vx, vy, vz, ex, ey, ez, bx, by, bz, dt, qm, n);
+#endif
 }
 
 BenchmarkResult benchmark_particle_push_openmp(size_t n, int num_iterations,

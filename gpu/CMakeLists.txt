@@ -37,17 +37,18 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --use_fast_math")
 # OpenMP offload flags
 # Note: GCC on this system is not configured with NVIDIA offload support
 # GPU offloading with OpenMP requires either NVHPC or GCC with offload enabled
-if(CMAKE_CXX_COMPILER_ID MATCHES "NVHPC")
-    set(OPENMP_OFFLOAD_FLAGS "-mp=gpu -gpu=cc80,cc86")
+if(CMAKE_CXX_COMPILER_ID MATCHES "NVHPC|PGI")
+    set(OPENMP_OFFLOAD_FLAGS "-mp=gpu" "-gpu=cc80,cc86")
     set(OPENMP_GPU_ENABLED TRUE)
+    message(STATUS "OpenMP GPU offload enabled with NVHPC")
 else()
     set(OPENMP_OFFLOAD_FLAGS "")
     set(OPENMP_GPU_ENABLED FALSE)
     message(STATUS "OpenMP GPU offload not available with current compiler")
 endif()
 
-if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC")
-    set(OPENMP_FORTRAN_OFFLOAD_FLAGS "-mp=gpu -gpu=cc80,cc86 -cuda")
+if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC|PGI")
+    set(OPENMP_FORTRAN_OFFLOAD_FLAGS "-mp=gpu" "-gpu=cc80,cc86" "-cuda")
 else()
     set(OPENMP_FORTRAN_OFFLOAD_FLAGS "")
 endif()

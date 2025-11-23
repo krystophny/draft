@@ -27,8 +27,28 @@ void fdm_laplacian_openmp_cpu(const double* u, double* lu,
 void fdm_laplacian_openmp_gpu(const double* u, double* lu,
                                int nx, int ny, int nz, double dx)
 {
-    // GPU offload disabled - fall back to CPU implementation
+#ifdef _OPENMP
+    double inv_dx2 = 1.0 / (dx * dx);
+    size_t total = nx * ny * nz;
+
+    #pragma omp target teams distribute parallel for collapse(3) \
+        map(to: u[0:total]) map(from: lu[0:total])
+    for (int k = 1; k < nz-1; ++k) {
+        for (int j = 1; j < ny-1; ++j) {
+            for (int i = 1; i < nx-1; ++i) {
+                int idx = i + nx * (j + ny * k);
+                lu[idx] = inv_dx2 * (
+                    u[idx-1] + u[idx+1] +
+                    u[idx-nx] + u[idx+nx] +
+                    u[idx-nx*ny] + u[idx+nx*ny] -
+                    6.0 * u[idx]
+                );
+            }
+        }
+    }
+#else
     fdm_laplacian_openmp_cpu(u, lu, nx, ny, nz, dx);
+#endif
 }
 
 BenchmarkResult benchmark_fdm_laplacian_openmp(int n, int num_iterations,

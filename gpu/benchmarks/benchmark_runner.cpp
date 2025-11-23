@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
         std::cout << std::string(120, '=') << std::endl;
         std::cout << "Benchmark complete. Saving results..." << std::endl;
 
-        save_results_csv(results, "../results/benchmark_results.csv");
+        save_results_csv(results, "results/benchmark_results.csv");
         std::cout << "Results saved to results/benchmark_results.csv" << std::endl;
     }
     Kokkos::finalize();
