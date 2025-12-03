@@ -20,6 +20,7 @@ help:
 build:
 	env PATH=$(NVHPC_ROOT)/bin:/opt/cuda/bin:$$PATH \
 		CUDA_HOME=$(CUDA_ROOT) \
+		NVHPC_CUDA_HOME=$(CUDA_ROOT) \
 		cmake -S . -B $(BUILD_DIR) -G Ninja \
 			-DCMAKE_C_COMPILER=$(NVHPC_ROOT)/bin/nvc \
 			-DCMAKE_CXX_COMPILER=$(NVHPC_ROOT)/bin/nvc++ \
@@ -29,6 +30,7 @@ build:
 			-DCMAKE_CUDA_ARCHITECTURES="80;86"
 	env PATH=$(NVHPC_ROOT)/bin:/opt/cuda/bin:$$PATH \
 		CUDA_HOME=$(CUDA_ROOT) \
+		NVHPC_CUDA_HOME=$(CUDA_ROOT) \
 		cmake --build $(BUILD_DIR) -j
 
 benchmark: build
