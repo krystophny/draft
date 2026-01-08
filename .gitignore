@@ -33,6 +33,7 @@ doc/latex/
 # Ignore backup files
 *~
 *.swp
+*.bak
 
 # Ignore object files
 *.mod
@@ -41,6 +42,13 @@ doc/latex/
 *.x
 _*.c
 __pycache__
+
+# gpu project artifacts
+gpu/build_test/
+gpu/debug_omp
+gpu/debug_particle
+gpu/debug_particle_fixed
+gpu/results/benchmark_results_new.csv
 
 # IDE files
 .vscode/
