@@ -25,9 +25,13 @@ doc/latex/
 *.bcf
 *.blg
 *.brf
+*.fdb_latexmk
+*.fls
 *.idx
 *.ilg
 *.ind
+*.run.xml
+*.synctex.gz
 *.toc
 
 # Ignore backup files

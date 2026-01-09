@@ -1,0 +1,116 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+
+\title{Chapter 1 (Lee) --- First Proofs}
+\author{}
+\date{}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Rn}{\R^n}
+\newcommand{\Homeo}{\cong}
+\newcommand{\Ball}[2]{B(#1,#2)}
+
+\begin{document}
+\maketitle
+
+\paragraph{Source.}
+This is a LaTeX rewrite of the first completed proof in \texttt{lean/Lee/Chapter1.lean}:
+theorem \texttt{exercise\_1\_1}.
+
+\section{Setup}
+Let $M$ be a topological space and let $n\in\mathbb{N}$. In the Lean file, $\Rn$ is represented as
+the function type $\mathrm{Fin}(n)\to \R$.
+
+\section{Definitions}
+
+\subsection*{Locally Euclidean}
+We say $M$ is \emph{locally Euclidean of dimension $n$} if for every $p\in M$ there exist an open
+neighborhood $U\subseteq M$ with $p\in U$, an open set $V\subseteq \Rn$, and a homeomorphism
+$\varphi:U\Homeo V$.
+
+\subsection*{Ball variant}
+We say $M$ is \emph{locally Euclidean by balls} if for every $p\in M$ there exist an open
+neighborhood $U\subseteq M$ with $p\in U$, a center $x\in \Rn$, a radius $r\in\R$, and a
+homeomorphism $\varphi:U\Homeo \Ball{x}{r}$, where $\Ball{x}{r}$ denotes the open metric ball.
+
+\subsection*{$\Rn$ variant}
+We say $M$ is \emph{locally Euclidean by $\Rn$} if for every $p\in M$ there exist an open
+neighborhood $U\subseteq M$ with $p\in U$ and a homeomorphism $\varphi:U\Homeo \Rn$.
+
+\section{Exercise 1.1}
+The Lean statement is the conjunction of the following equivalences:
+\[
+\mathrm{IsLocallyEuclidean}(M,n)\iff \mathrm{IsLocallyEuclideanBall}(M,n),
+\qquad
+\mathrm{IsLocallyEuclidean}(M,n)\iff \mathrm{IsLocallyEuclideanRn}(M,n).
+\]
+
+\subsection{Part A: $\mathrm{IsLocallyEuclidean}\iff \mathrm{IsLocallyEuclideanBall}$}
+
+\subsubsection*{Direction 1: locally Euclidean $\Rightarrow$ ball version}
+Fix $p\in M$ and assume $M$ is locally Euclidean. Choose $U\subseteq M$ open with $p\in U$, an open
+set $V\subseteq \Rn$, and a homeomorphism $\varphi:U\Homeo V$.
+
+Since $V$ is open and $\varphi(p)\in V$, there exists $\varepsilon>0$ such that
+\[
+\Ball{\varphi(p)}{\varepsilon}\subseteq V.
+\]
+(In the Lean proof this is obtained from \texttt{Metric.isOpen\_iff}.)
+
+Define
+\[
+U':=\varphi^{-1}\bigl(\Ball{\varphi(p)}{\varepsilon}\bigr).
+\]
+Then $U'$ is open (preimage of an open ball under the continuous map $\varphi^{-1}$) and $p\in U'$
+because $\varphi(p)\in \Ball{\varphi(p)}{\varepsilon}$.
+
+Restricting $\varphi$ to $U'$ yields a homeomorphism
+\[
+\varphi':U'\Homeo \Ball{\varphi(p)}{\varepsilon},
+\]
+matching the ball definition. (Lean constructs this with \texttt{$\varphi$.preimageHomeomorph}.)
+
+\subsubsection*{Direction 2: ball version $\Rightarrow$ locally Euclidean}
+Fix $p\in M$ and assume there exist $U\subseteq M$ open with $p\in U$ and a homeomorphism
+$\varphi:U\Homeo \Ball{x}{r}$ for some $x\in\Rn$ and $r\in\R$.
+Let $V:=\Ball{x}{r}$, which is open in $\Rn$. Then $(U,V,\varphi)$ witnesses the locally Euclidean
+definition.
+
+\subsection{Part B: $\mathrm{IsLocallyEuclidean}\iff \mathrm{IsLocallyEuclideanRn}$}
+
+\subsubsection*{Direction 1: locally Euclidean $\Rightarrow$ $\Rn$ version}
+Fix $p\in M$ and assume $M$ is locally Euclidean. By Part~A, choose an open neighborhood $U$ of $p$
+and a homeomorphism $\varphi:U\Homeo \Ball{x}{r}$.
+
+From $p\in U$ we have $\varphi(p)\in \Ball{x}{r}$, i.e.\ $d(\varphi(p),x)<r$. Since distances are
+nonnegative, this implies $r>0$.
+
+There is a standard homeomorphism between an open ball and all of $\Rn$ (for $r>0$):
+\[
+\Ball{x}{r}\Homeo \Rn.
+\]
+In the Lean proof this is \texttt{Homeomorph.univBall x r hr} (used with \texttt{.symm}).
+
+\paragraph{One explicit model.}
+For the unit ball $\Ball{0}{1}\subseteq\Rn$, a standard choice is
+\[
+f:\Ball{0}{1}\to\Rn,\qquad f(u)=\frac{u}{1-\lVert u\rVert},
+\]
+with inverse
+\[
+f^{-1}:\Rn\to\Ball{0}{1},\qquad f^{-1}(v)=\frac{v}{1+\lVert v\rVert}.
+\]
+For a general ball $\Ball{x}{r}$ with $r>0$, precompose with translation and scaling
+$u=(y-x)/r$.
+
+Composing with $\varphi$ gives $U\Homeo \Rn$, proving the $\Rn$ variant.
+
+\subsubsection*{Direction 2: $\Rn$ version $\Rightarrow$ locally Euclidean}
+If $p\in U\subseteq M$ with $U$ open and $U\Homeo \Rn$, then taking $V=\Rn$ in the original
+definition immediately yields that $M$ is locally Euclidean.
+
+\end{document}
