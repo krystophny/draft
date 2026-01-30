@@ -1,0 +1,16 @@
+# Cloned repositories (large)
+repos/
+
+# Build artifacts
+build/
+*.o
+*.mod
+*.a
+*.so
+*.dylib
+
+# Results (regeneratable)
+results/
+
+# OS files
+.DS_Store
