@@ -9,8 +9,9 @@ build/
 *.so
 *.dylib
 
-# Results (regeneratable)
-results/
+# Python
+__pycache__/
+*.pyc
 
 # OS files
 .DS_Store

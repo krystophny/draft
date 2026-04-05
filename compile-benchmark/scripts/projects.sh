@@ -49,31 +49,7 @@ FORTRAN_PROJECTS=(
 # =============================================================================
 
 C_PROJECTS=(
-    # Small (<2k LOC)
-    "https://github.com/zserge/jsmn|small|make|JSON tokenizer"
-    "https://github.com/nothings/stb|small|header|single-header libs"
-    "https://github.com/rxi/log.c|small|make|logging"
-    "https://github.com/sheredom/utf8.h|small|header|UTF-8 handling"
-    "https://github.com/antirez/sds|small|make|dynamic strings"
-    "https://github.com/troydhanson/uthash|small|header|hash tables"
-    "https://github.com/kgabis/parson|small|make|JSON parser"
-    "https://github.com/benhoyt/inih|small|make|INI parser"
-    "https://github.com/clibs/buffer|small|make|buffer library"
-    "https://github.com/clibs/list|small|make|linked list"
-
-    # Medium (2k-20k LOC)
-    "https://github.com/DaveGamble/cJSON|medium|cmake|JSON parser"
-    "https://github.com/madler/zlib|medium|cmake|compression"
-    "https://github.com/glennrp/libpng|medium|cmake|PNG handling"
-    "https://github.com/akheron/jansson|medium|cmake|JSON library"
-    "https://github.com/argtable/argtable3|medium|cmake|CLI parsing"
-    "https://github.com/ThrowTheSwitch/Unity|medium|cmake|unit testing"
-    "https://github.com/B-Con/crypto-algorithms|medium|make|crypto primitives"
-    "https://github.com/attractivechaos/klib|medium|header|generic library"
-    "https://github.com/ianlancetaylor/libbacktrace|medium|cmake|backtraces"
-    "https://github.com/antirez/linenoise|medium|make|line editing"
-
-    # Large (20k-100k LOC)
+    # Large C projects only (>20k LOC) - for fair comparison
     "https://github.com/lua/lua|large|make|scripting language"
     "https://github.com/rui314/chibicc|large|make|C compiler"
     "https://github.com/lz4/lz4|large|cmake|compression"
@@ -81,56 +57,69 @@ C_PROJECTS=(
     "https://github.com/redis/hiredis|large|cmake|Redis client"
     "https://github.com/libevent/libevent|large|cmake|event library"
     "https://github.com/libuv/libuv|large|cmake|async I/O"
-    "https://github.com/sqlite/sqlite|large|make|database"
-    "https://github.com/rgerhards/libfastjson|large|cmake|fast JSON"
-    "https://github.com/json-c/json-c|large|cmake|JSON library"
+    "https://github.com/madler/zlib|large|cmake|compression"
+    "https://github.com/glennrp/libpng|large|cmake|PNG handling"
+    "https://github.com/curl/curl|large|cmake|HTTP client"
+    "https://github.com/openssl/openssl|large|cmake|crypto library"
+    "https://github.com/libgit2/libgit2|large|cmake|git library"
+    "https://github.com/redis/redis|large|make|database"
+    "https://github.com/nginx/nginx|large|make|web server"
+    "https://github.com/tmux/tmux|large|cmake|terminal multiplexer"
+    "https://github.com/git/git|large|make|version control"
+    "https://github.com/vim/vim|large|make|text editor"
+    "https://github.com/FFmpeg/FFmpeg|large|make|media framework"
+    "https://github.com/micropython/micropython|large|make|Python for MCU"
+    "https://github.com/raysan5/raylib|large|cmake|game library"
+    "https://github.com/libexpat/libexpat|large|cmake|XML parser"
+    "https://github.com/warmcat/libwebsockets|large|cmake|WebSocket library"
+    "https://github.com/libjpeg-turbo/libjpeg-turbo|large|cmake|JPEG codec"
+    "https://github.com/webmproject/libwebp|large|cmake|WebP codec"
+    "https://github.com/libsndfile/libsndfile|large|cmake|audio I/O"
+    "https://github.com/libffi/libffi|large|cmake|FFI library"
+    "https://github.com/libusb/libusb|large|cmake|USB library"
+    "https://github.com/libarchive/libarchive|large|cmake|archive library"
+    "https://github.com/jedisct1/libsodium|large|cmake|crypto library"
+    "https://github.com/apache/apr|large|cmake|portable runtime"
 )
 
 # =============================================================================
-# C++ PROJECTS (35) - focus on header-only and simple cmake
+# C++ PROJECTS - mix of small and large for fair comparison
 # =============================================================================
 
 CPP_PROJECTS=(
-    # Small - header-only (high success rate)
-    "https://github.com/nlohmann/json|small|cmake|JSON header-only"
-    "https://github.com/catchorg/Catch2|small|cmake|testing"
-    "https://github.com/doctest/doctest|small|cmake|testing"
-    "https://github.com/jarro2783/cxxopts|small|cmake|CLI parsing"
-    "https://github.com/Neargye/magic_enum|small|cmake|enum reflection"
-    "https://github.com/marzer/tomlplusplus|small|cmake|TOML parser"
-    "https://github.com/p-ranav/indicators|small|cmake|progress bars"
-    "https://github.com/CLIUtils/CLI11|small|cmake|CLI parsing"
-    "https://github.com/p-ranav/argparse|small|cmake|argument parsing"
-    "https://github.com/p-ranav/tabulate|small|cmake|table formatting"
-    "https://github.com/fmtlib/fmt|small|cmake|formatting"
-    "https://github.com/ericniebler/range-v3|small|cmake|ranges"
+    # Small C++ projects (<5k LOC) - compiled libraries, not header-only
+    "https://github.com/zeux/pugixml|small|cmake|XML parser"
+    "https://github.com/yhirose/cpp-peglib|small|cmake|PEG parser"
+    "https://github.com/bombela/backward-cpp|small|cmake|stack traces"
+    "https://github.com/adishavit/argh|small|cmake|argument parser"
+    "https://github.com/mpark/variant|small|cmake|variant implementation"
 
-    # Medium - simple cmake projects
-    "https://github.com/Tencent/rapidjson|medium|cmake|JSON"
-    "https://github.com/zeux/pugixml|medium|cmake|XML"
-    "https://github.com/jbeder/yaml-cpp|medium|cmake|YAML"
-    "https://github.com/google/googletest|medium|cmake|testing"
+    # Medium C++ projects (5k-20k LOC)
+    "https://github.com/google/googletest|medium|cmake|testing framework"
     "https://github.com/google/benchmark|medium|cmake|microbenchmarks"
-    "https://github.com/yhirose/cpp-httplib|medium|cmake|HTTP server"
-    "https://github.com/HowardHinnant/date|medium|cmake|datetime"
-    "https://github.com/gabime/spdlog|medium|cmake|logging"
-    "https://github.com/cameron314/concurrentqueue|medium|header|lock-free queue"
-    "https://github.com/taskflow/taskflow|medium|cmake|parallel tasks"
-    "https://github.com/onqtam/doctest|medium|cmake|testing"
-    "https://github.com/bombela/backward-cpp|medium|cmake|stack traces"
+    "https://github.com/ArthurSonzogni/FTXUI|medium|cmake|TUI library"
+    "https://github.com/litehtml/litehtml|medium|cmake|HTML renderer"
+    "https://github.com/jbeder/yaml-cpp|medium|cmake|YAML parser"
+    "https://github.com/catchorg/Catch2|medium|cmake|testing framework"
+    "https://github.com/fmtlib/fmt|medium|cmake|formatting library"
+    "https://github.com/gabime/spdlog|medium|cmake|logging library"
 
-    # Large - well-maintained projects
-    "https://github.com/simdjson/simdjson|large|cmake|JSON parser"
+    # Large C++ projects (>20k LOC) - real compiled code
+    "https://github.com/simdjson/simdjson|large|cmake|fast JSON parser"
     "https://github.com/google/re2|large|cmake|regex engine"
     "https://github.com/google/snappy|large|cmake|compression"
     "https://github.com/google/flatbuffers|large|cmake|serialization"
-    "https://github.com/msgpack/msgpack-c|large|cmake|serialization"
-    "https://github.com/USCiLab/cereal|large|cmake|serialization"
-    "https://github.com/xtensor-stack/xtensor|large|cmake|tensors"
-    "https://github.com/ArthurSonzogni/FTXUI|large|cmake|TUI library"
-    "https://github.com/foonathan/memory|large|cmake|allocators"
-    "https://github.com/pantor/inja|large|cmake|templates"
-    "https://github.com/martinus/robin-hood-hashing|large|cmake|hash map"
+    "https://github.com/google/leveldb|large|cmake|key-value store"
+    "https://github.com/abseil/abseil-cpp|large|cmake|base library"
+    "https://github.com/bulletphysics/bullet3|large|cmake|physics engine"
+    "https://github.com/libjpeg-turbo/libjpeg-turbo|large|cmake|JPEG codec"
+    "https://github.com/glfw/glfw|large|cmake|window library"
+    "https://github.com/assimp/assimp|large|cmake|3D model importer"
+    "https://github.com/facebook/folly|large|cmake|Facebook library"
+    "https://github.com/grpc/grpc|large|cmake|RPC framework"
+    "https://github.com/protocolbuffers/protobuf|large|cmake|serialization"
+    "https://github.com/boostorg/beast|large|cmake|HTTP/WebSocket"
+    "https://github.com/opencv/opencv|large|cmake|computer vision"
 )
 
 # =============================================================================
