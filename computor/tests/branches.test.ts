@@ -1,9 +1,8 @@
-import axios from 'axios';
+import assert from 'node:assert/strict';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import axios, { type AxiosResponse } from 'axios';
 import { getOpenBranches } from '../src/branches';
 import { initConfig } from '../src/config';
-
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const projectId = 'my-project';
 const accessToken = 'my-access-token';
@@ -13,10 +12,14 @@ const expectedUrl =
 const expectedConfig = {
   headers: { 'Private-Token': accessToken },
 };
+const originalGet = axios.get;
 
 beforeEach(() => {
   initConfig(accessToken, hostname);
-  mockedAxios.get.mockReset();
+});
+
+afterEach(() => {
+  axios.get = originalGet;
 });
 
 describe('getOpenBranches', () => {
@@ -29,19 +32,27 @@ describe('getOpenBranches', () => {
         developers_can_push: true, developers_can_merge: true,
         can_push: true, default: false },
     ];
-    mockedAxios.get.mockResolvedValueOnce({ data: branches });
+    let calledWith: [string, typeof expectedConfig] | undefined;
+    axios.get = (async (url, config) => {
+      calledWith = [url, config as typeof expectedConfig];
+      return { data: branches } as AxiosResponse<typeof branches>;
+    }) as typeof axios.get;
 
     const result = await getOpenBranches(projectId);
 
-    expect(result).toEqual([branches[0]]);
-    expect(mockedAxios.get).toHaveBeenCalledWith(expectedUrl, expectedConfig);
+    assert.deepEqual(result, [branches[0]]);
+    assert.deepEqual(calledWith, [expectedUrl, expectedConfig]);
   });
 
   it('propagates errors from axios', async () => {
     const error = new Error('Failed to fetch branches');
-    mockedAxios.get.mockRejectedValueOnce(error);
+    let calledWith: [string, typeof expectedConfig] | undefined;
+    axios.get = (async (url, config) => {
+      calledWith = [url, config as typeof expectedConfig];
+      throw error;
+    }) as typeof axios.get;
 
-    await expect(getOpenBranches(projectId)).rejects.toThrow(error);
-    expect(mockedAxios.get).toHaveBeenCalledWith(expectedUrl, expectedConfig);
+    await assert.rejects(getOpenBranches(projectId), error);
+    assert.deepEqual(calledWith, [expectedUrl, expectedConfig]);
   });
 });
